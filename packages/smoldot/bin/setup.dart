@@ -45,7 +45,9 @@ Future<void> main(List<String> args) async {
   }
 
   try {
-    stdout.writeln('smoldot: downloading ${target.assetName} (v$kSmoldotLibVersion)...');
+    stdout.writeln(
+      'smoldot: downloading ${target.assetName} (v$kSmoldotLibVersion)...',
+    );
     final libBytes = await _download(target.assetUrl);
 
     if (verify) {
@@ -71,7 +73,9 @@ Future<void> main(List<String> args) async {
     tmp.renameSync(dest);
 
     final mib = (libBytes.length / 1048576).toStringAsFixed(2);
-    stdout.writeln('smoldot: installed ${target.libFileName} ($mib MiB) ->\n  $dest');
+    stdout.writeln(
+      'smoldot: installed ${target.libFileName} ($mib MiB) ->\n  $dest',
+    );
     stdout.writeln('smoldot: done. SmoldotClient will load it automatically.');
   } on Object catch (e) {
     stderr.writeln('smoldot: setup failed: $e');
@@ -102,7 +106,10 @@ Future<Uint8List> _download(Uri url) async {
 }
 
 Future<bool> _verifySignature(Uint8List message, Uint8List signatureBytes) {
-  final publicKey = SimplePublicKey(_hexToBytes(kPrebuiltPublicKeyHex), type: KeyPairType.ed25519);
+  final publicKey = SimplePublicKey(
+    _hexToBytes(kPrebuiltPublicKeyHex),
+    type: KeyPairType.ed25519,
+  );
   final signature = Signature(signatureBytes, publicKey: publicKey);
   return Ed25519().verify(message, signature: signature);
 }

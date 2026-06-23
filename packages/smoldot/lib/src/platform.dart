@@ -104,10 +104,30 @@ class SmoldotPlatform {
     // 2. Local `cargo build` output, for developing against the Rust crate directly. cwd is the
     //    package/repo root during `dart test`, or the example dir when running an example.
     final devPaths = <String>[
-      path.join(Directory.current.path, 'rust', 'target', 'release', libraryName),
+      path.join(
+        Directory.current.path,
+        'rust',
+        'target',
+        'release',
+        libraryName,
+      ),
       path.join(Directory.current.path, 'rust', 'target', 'debug', libraryName),
-      path.join(Directory.current.path, '..', 'rust', 'target', 'release', libraryName),
-      path.join(Directory.current.path, '..', 'rust', 'target', 'debug', libraryName),
+      path.join(
+        Directory.current.path,
+        '..',
+        'rust',
+        'target',
+        'release',
+        libraryName,
+      ),
+      path.join(
+        Directory.current.path,
+        '..',
+        'rust',
+        'target',
+        'debug',
+        libraryName,
+      ),
     ];
     for (final devPath in devPaths) {
       if (File(devPath).existsSync()) {

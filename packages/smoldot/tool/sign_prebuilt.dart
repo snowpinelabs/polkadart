@@ -18,12 +18,16 @@ import 'package:cryptography/cryptography.dart';
 Future<void> main(List<String> args) async {
   final hexKey = Platform.environment['SMOLDOT_SIGNING_KEY'];
   if (hexKey == null || hexKey.isEmpty) {
-    stderr.writeln('sign_prebuilt: SMOLDOT_SIGNING_KEY (hex Ed25519 seed or secret key) is not set.');
+    stderr.writeln(
+      'sign_prebuilt: SMOLDOT_SIGNING_KEY (hex Ed25519 seed or secret key) is not set.',
+    );
     exitCode = 1;
     return;
   }
   if (args.isEmpty) {
-    stderr.writeln('sign_prebuilt: usage: dart run tool/sign_prebuilt.dart <file>...');
+    stderr.writeln(
+      'sign_prebuilt: usage: dart run tool/sign_prebuilt.dart <file>...',
+    );
     exitCode = 1;
     return;
   }
@@ -45,7 +49,9 @@ Future<void> main(List<String> args) async {
     final signature = await algorithm.sign(bytes, keyPair: keyPair);
     final sigPath = '$path.sig';
     await File(sigPath).writeAsBytes(signature.bytes, flush: true);
-    stdout.writeln('signed $path -> $sigPath (${signature.bytes.length} bytes)');
+    stdout.writeln(
+      'signed $path -> $sigPath (${signature.bytes.length} bytes)',
+    );
   }
 }
 

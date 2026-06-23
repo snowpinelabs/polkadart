@@ -15,8 +15,11 @@ Future<void> main() async {
   final keyPair = await Ed25519().newKeyPair();
   final seed = await keyPair.extractPrivateKeyBytes(); // 32-byte Ed25519 seed
   final publicKey = await keyPair.extractPublicKey();
-  stdout.writeln('PUBLIC  (kPrebuiltPublicKeyHex)       : ${_hex(publicKey.bytes)}');
+  stdout.writeln(
+    'PUBLIC  (kPrebuiltPublicKeyHex)       : ${_hex(publicKey.bytes)}',
+  );
   stdout.writeln('PRIVATE (SMOLDOT_SIGNING_KEY secret)  : ${_hex(seed)}');
 }
 
-String _hex(List<int> bytes) => bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+String _hex(List<int> bytes) =>
+    bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
