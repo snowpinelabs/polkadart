@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/leonardocustodio/polkadart/main/.github/assets/polkadart-logo.png" height="120" alt="Polkadart" />
+<img src="https://raw.githubusercontent.com/snowpinelabs/polkadart/main/.github/assets/polkadart-logo.png" height="120" alt="Polkadart" />
 </p>
 
 <h3 align="center">
@@ -11,10 +11,10 @@
 </p>
 
 <p align="center">
-<a href="https://github.com/leonardocustodio/polkadart"><img src="https://img.shields.io/github/stars/leonardocustodio/polkadart.svg?style=flat&logo=github&colorB=deeppink&label=Stars" alt="Star on Github"></a>
-<a href="https://github.com/leonardocustodio/polkadart/actions/workflows/tests.yml"><img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/leonardocustodio/polkadart/tests.yml?style=flat&label=Tests"></a>
-<a href="https://codecov.io/gh/leonardocustodio/polkadart"><img src="https://img.shields.io/codecov/c/github/leonardocustodio/polkadart?label=Codecov&token=HG3K4LW5UN" alt="Codecov"></a>
-<a href="#contributors"><img src="https://img.shields.io/github/all-contributors/leonardocustodio/polkadart?color=ee8449&label=All%20Contributors" alt="All contributors"></a>
+<a href="https://github.com/snowpinelabs/polkadart"><img src="https://img.shields.io/github/stars/snowpinelabs/polkadart.svg?style=flat&logo=github&colorB=deeppink&label=Stars" alt="Star on Github"></a>
+<a href="https://github.com/snowpinelabs/polkadart/actions/workflows/tests.yml"><img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/snowpinelabs/polkadart/tests.yml?style=flat&label=Tests"></a>
+<a href="https://codecov.io/gh/snowpinelabs/polkadart"><img src="https://img.shields.io/codecov/c/github/snowpinelabs/polkadart?label=Codecov&token=HG3K4LW5UN" alt="Codecov"></a>
+<a href="#contributors"><img src="https://img.shields.io/github/all-contributors/snowpinelabs/polkadart?color=ee8449&label=All%20Contributors" alt="All contributors"></a>
 <a href="https://www.apache.org/licenses/LICENSE-2.0"><img src="https://img.shields.io/badge/license-Apache%202.0-purple.svg?label=License" alt="License: Apache 2"></a>
 </p>
 
@@ -145,7 +145,7 @@ This repository is a monorepo containing the complete Polkadart ecosystem:
 - [Installation Guide](https://pub.dev/documentation/polkadart/latest/)
 - [Quick Start Tutorial](https://polkadart.dev)
 - [API Reference](https://pub.dev/documentation/polkadart/latest/)
-- [Examples](https://github.com/leonardocustodio/polkadart/tree/main/apps/examples)
+- [Examples](https://github.com/snowpinelabs/polkadart/tree/main/apps/examples)
 </details>
 
 <details>
@@ -183,8 +183,8 @@ This repository is a monorepo containing the complete Polkadart ecosystem:
 
 - 💬 [Matrix Chat](https://matrix.to/#/%23polkadart:matrix.org) - Developer discussions
 - 📖 [API Documentation](https://polkadart.dev) - Complete reference
-- 🐛 [Issue Tracker](https://github.com/leonardocustodio/polkadart/issues) - Report bugs
-- 💡 [Discussions](https://github.com/leonardocustodio/polkadart/discussions) - Feature requests
+- 🐛 [Issue Tracker](https://github.com/snowpinelabs/polkadart/issues) - Report bugs
+- 💡 [Discussions](https://github.com/snowpinelabs/polkadart/discussions) - Feature requests
 
 </td>
 <td width="50%">
@@ -193,8 +193,8 @@ This repository is a monorepo containing the complete Polkadart ecosystem:
 
 - 📱 [Encointer Wallet](https://github.com/encointer/encointer-wallet-flutter) - Production wallet
 - 🏛️ [Polkadot Forum](https://forum.polkadot.network/t/introducing-polkadart/10697) - Official announcement
-- 🎮 [Example Apps](https://github.com/leonardocustodio/polkadart/tree/main/apps/examples) - Sample code
-- 🚀 [Your App Here!](https://github.com/leonardocustodio/polkadart/issues/new) - Share your project
+- 🎮 [Example Apps](https://github.com/snowpinelabs/polkadart/tree/main/apps/examples) - Sample code
+- 🚀 [Your App Here!](https://github.com/snowpinelabs/polkadart/issues/new) - Share your project
 
 </td>
 </tr>
@@ -251,21 +251,21 @@ A heartfelt thank you to all the amazing contributors who have helped build Polk
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/leonardocustodio"><img src="https://avatars.githubusercontent.com/u/5619696?v=4?s=100" width="100px;" alt="Leonardo Custodio"/><br /><sub><b>Leonardo Custodio</b></sub></a><br /><a href="https://github.com/leonardocustodio/polkadart/commits?author=leonardocustodio" title="Code">💻</a> <a href="https://github.com/leonardocustodio/polkadart/commits?author=leonardocustodio" title="Tests">⚠️</a> <a href="https://github.com/leonardocustodio/polkadart/pulls?q=is%3Apr+reviewed-by%3Aleonardocustodio" title="Reviewed Pull Requests">👀</a> <a href="#question-leonardocustodio" title="Answering Questions">💬</a> <a href="#maintenance-leonardocustodio" title="Maintenance">🚧</a> <a href="#example-leonardocustodio" title="Examples">💡</a> <a href="https://github.com/leonardocustodio/polkadart/commits?author=leonardocustodio" title="Documentation">📖</a> <a href="https://github.com/leonardocustodio/polkadart/issues?q=author%3Aleonardocustodio" title="Bug reports">🐛</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://kawal.dev"><img src="https://avatars.githubusercontent.com/u/49296873?v=4?s=100" width="100px;" alt="justkawal"/><br /><sub><b>justkawal</b></sub></a><br /><a href="https://github.com/leonardocustodio/polkadart/commits?author=justkawal" title="Code">💻</a> <a href="https://github.com/leonardocustodio/polkadart/commits?author=justkawal" title="Tests">⚠️</a> <a href="https://github.com/leonardocustodio/polkadart/pulls?q=is%3Apr+reviewed-by%3Ajustkawal" title="Reviewed Pull Requests">👀</a> <a href="#maintenance-justkawal" title="Maintenance">🚧</a> <a href="#example-justkawal" title="Examples">💡</a> <a href="https://github.com/leonardocustodio/polkadart/issues?q=author%3Ajustkawal" title="Bug reports">🐛</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="http://www.lohannferreira.com.br"><img src="https://avatars.githubusercontent.com/u/4323004?v=4?s=100" width="100px;" alt="Lohann Paterno Coutinho Ferreira"/><br /><sub><b>Lohann Paterno Coutinho Ferreira</b></sub></a><br /><a href="https://github.com/leonardocustodio/polkadart/commits?author=Lohann" title="Code">💻</a> <a href="https://github.com/leonardocustodio/polkadart/commits?author=Lohann" title="Tests">⚠️</a> <a href="https://github.com/leonardocustodio/polkadart/pulls?q=is%3Apr+reviewed-by%3ALohann" title="Reviewed Pull Requests">👀</a> <a href="#example-Lohann" title="Examples">💡</a> <a href="https://github.com/leonardocustodio/polkadart/issues?q=author%3ALohann" title="Bug reports">🐛</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/gabrielokura"><img src="https://avatars.githubusercontent.com/u/26012776?v=4?s=100" width="100px;" alt="Gabriel Okura"/><br /><sub><b>Gabriel Okura</b></sub></a><br /><a href="https://github.com/leonardocustodio/polkadart/commits?author=gabrielokura" title="Code">💻</a> <a href="https://github.com/leonardocustodio/polkadart/commits?author=gabrielokura" title="Tests">⚠️</a> <a href="#example-gabrielokura" title="Examples">💡</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/clangenb"><img src="https://avatars.githubusercontent.com/u/37865735?v=4?s=100" width="100px;" alt="clangenb"/><br /><sub><b>clangenb</b></sub></a><br /><a href="https://github.com/leonardocustodio/polkadart/commits?author=clangenb" title="Code">💻</a> <a href="https://github.com/leonardocustodio/polkadart/commits?author=clangenb" title="Tests">⚠️</a> <a href="https://github.com/leonardocustodio/polkadart/issues?q=author%3Aclangenb" title="Bug reports">🐛</a> <a href="#question-clangenb" title="Answering Questions">💬</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://pastre.dev"><img src="https://avatars.githubusercontent.com/u/6251198?v=4?s=100" width="100px;" alt="Bruno Pastre"/><br /><sub><b>Bruno Pastre</b></sub></a><br /><a href="https://github.com/leonardocustodio/polkadart/pulls?q=is%3Apr+reviewed-by%3Apastre" title="Reviewed Pull Requests">👀</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/weishirongzhen"><img src="https://avatars.githubusercontent.com/u/54241621?v=4?s=100" width="100px;" alt="weiwei"/><br /><sub><b>weiwei</b></sub></a><br /><a href="https://github.com/leonardocustodio/polkadart/commits?author=weishirongzhen" title="Code">💻</a> <a href="https://github.com/leonardocustodio/polkadart/issues?q=author%3Aweishirongzhen" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/leonardocustodio"><img src="https://avatars.githubusercontent.com/u/5619696?v=4?s=100" width="100px;" alt="Leonardo Custodio"/><br /><sub><b>Leonardo Custodio</b></sub></a><br /><a href="https://github.com/snowpinelabs/polkadart/commits?author=leonardocustodio" title="Code">💻</a> <a href="https://github.com/snowpinelabs/polkadart/commits?author=leonardocustodio" title="Tests">⚠️</a> <a href="https://github.com/snowpinelabs/polkadart/pulls?q=is%3Apr+reviewed-by%3Aleonardocustodio" title="Reviewed Pull Requests">👀</a> <a href="#question-leonardocustodio" title="Answering Questions">💬</a> <a href="#maintenance-leonardocustodio" title="Maintenance">🚧</a> <a href="#example-leonardocustodio" title="Examples">💡</a> <a href="https://github.com/snowpinelabs/polkadart/commits?author=leonardocustodio" title="Documentation">📖</a> <a href="https://github.com/snowpinelabs/polkadart/issues?q=author%3Aleonardocustodio" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://kawal.dev"><img src="https://avatars.githubusercontent.com/u/49296873?v=4?s=100" width="100px;" alt="justkawal"/><br /><sub><b>justkawal</b></sub></a><br /><a href="https://github.com/snowpinelabs/polkadart/commits?author=justkawal" title="Code">💻</a> <a href="https://github.com/snowpinelabs/polkadart/commits?author=justkawal" title="Tests">⚠️</a> <a href="https://github.com/snowpinelabs/polkadart/pulls?q=is%3Apr+reviewed-by%3Ajustkawal" title="Reviewed Pull Requests">👀</a> <a href="#maintenance-justkawal" title="Maintenance">🚧</a> <a href="#example-justkawal" title="Examples">💡</a> <a href="https://github.com/snowpinelabs/polkadart/issues?q=author%3Ajustkawal" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://www.lohannferreira.com.br"><img src="https://avatars.githubusercontent.com/u/4323004?v=4?s=100" width="100px;" alt="Lohann Paterno Coutinho Ferreira"/><br /><sub><b>Lohann Paterno Coutinho Ferreira</b></sub></a><br /><a href="https://github.com/snowpinelabs/polkadart/commits?author=Lohann" title="Code">💻</a> <a href="https://github.com/snowpinelabs/polkadart/commits?author=Lohann" title="Tests">⚠️</a> <a href="https://github.com/snowpinelabs/polkadart/pulls?q=is%3Apr+reviewed-by%3ALohann" title="Reviewed Pull Requests">👀</a> <a href="#example-Lohann" title="Examples">💡</a> <a href="https://github.com/snowpinelabs/polkadart/issues?q=author%3ALohann" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/gabrielokura"><img src="https://avatars.githubusercontent.com/u/26012776?v=4?s=100" width="100px;" alt="Gabriel Okura"/><br /><sub><b>Gabriel Okura</b></sub></a><br /><a href="https://github.com/snowpinelabs/polkadart/commits?author=gabrielokura" title="Code">💻</a> <a href="https://github.com/snowpinelabs/polkadart/commits?author=gabrielokura" title="Tests">⚠️</a> <a href="#example-gabrielokura" title="Examples">💡</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/clangenb"><img src="https://avatars.githubusercontent.com/u/37865735?v=4?s=100" width="100px;" alt="clangenb"/><br /><sub><b>clangenb</b></sub></a><br /><a href="https://github.com/snowpinelabs/polkadart/commits?author=clangenb" title="Code">💻</a> <a href="https://github.com/snowpinelabs/polkadart/commits?author=clangenb" title="Tests">⚠️</a> <a href="https://github.com/snowpinelabs/polkadart/issues?q=author%3Aclangenb" title="Bug reports">🐛</a> <a href="#question-clangenb" title="Answering Questions">💬</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://pastre.dev"><img src="https://avatars.githubusercontent.com/u/6251198?v=4?s=100" width="100px;" alt="Bruno Pastre"/><br /><sub><b>Bruno Pastre</b></sub></a><br /><a href="https://github.com/snowpinelabs/polkadart/pulls?q=is%3Apr+reviewed-by%3Apastre" title="Reviewed Pull Requests">👀</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/weishirongzhen"><img src="https://avatars.githubusercontent.com/u/54241621?v=4?s=100" width="100px;" alt="weiwei"/><br /><sub><b>weiwei</b></sub></a><br /><a href="https://github.com/snowpinelabs/polkadart/commits?author=weishirongzhen" title="Code">💻</a> <a href="https://github.com/snowpinelabs/polkadart/issues?q=author%3Aweishirongzhen" title="Bug reports">🐛</a></td>
     </tr>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/BurnWW"><img src="https://avatars.githubusercontent.com/u/94514135?v=4?s=100" width="100px;" alt="Burnww"/><br /><sub><b>Burnww</b></sub></a><br /><a href="https://github.com/leonardocustodio/polkadart/commits?author=BurnWW" title="Code">💻</a> <a href="https://github.com/leonardocustodio/polkadart/issues?q=author%3ABurnWW" title="Bug reports">🐛</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://avive.github.io"><img src="https://avatars.githubusercontent.com/u/96002?v=4?s=100" width="100px;" alt="Aviv Eyal"/><br /><sub><b>Aviv Eyal</b></sub></a><br /><a href="https://github.com/leonardocustodio/polkadart/commits?author=avive" title="Code">💻</a> <a href="https://github.com/leonardocustodio/polkadart/issues?q=author%3Aavive" title="Bug reports">🐛</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/jpnovochadlo"><img src="https://avatars.githubusercontent.com/u/69369894?v=4?s=100" width="100px;" alt="jpnovochadlo"/><br /><sub><b>jpnovochadlo</b></sub></a><br /><a href="#business-jpnovochadlo" title="Business development">💼</a> <a href="#design-jpnovochadlo" title="Design">🎨</a> <a href="https://github.com/leonardocustodio/polkadart/commits?author=jpnovochadlo" title="Documentation">📖</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/tallesborges"><img src="https://avatars.githubusercontent.com/u/3486359?v=4?s=100" width="100px;" alt="Talles "/><br /><sub><b>Talles </b></sub></a><br /><a href="https://github.com/leonardocustodio/polkadart/commits?author=tallesborges" title="Code">💻</a> <a href="https://github.com/leonardocustodio/polkadart/commits?author=tallesborges" title="Documentation">📖</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="http://r3lab.com"><img src="https://avatars.githubusercontent.com/u/49204989?v=4?s=100" width="100px;" alt="Burak"/><br /><sub><b>Burak</b></sub></a><br /><a href="https://github.com/leonardocustodio/polkadart/commits?author=buraktabn" title="Code">💻</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/vjrj"><img src="https://avatars.githubusercontent.com/u/180085?v=4?s=100" width="100px;" alt="vjrj"/><br /><sub><b>vjrj</b></sub></a><br /><a href="https://github.com/leonardocustodio/polkadart/commits?author=vjrj" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/BurnWW"><img src="https://avatars.githubusercontent.com/u/94514135?v=4?s=100" width="100px;" alt="Burnww"/><br /><sub><b>Burnww</b></sub></a><br /><a href="https://github.com/snowpinelabs/polkadart/commits?author=BurnWW" title="Code">💻</a> <a href="https://github.com/snowpinelabs/polkadart/issues?q=author%3ABurnWW" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://avive.github.io"><img src="https://avatars.githubusercontent.com/u/96002?v=4?s=100" width="100px;" alt="Aviv Eyal"/><br /><sub><b>Aviv Eyal</b></sub></a><br /><a href="https://github.com/snowpinelabs/polkadart/commits?author=avive" title="Code">💻</a> <a href="https://github.com/snowpinelabs/polkadart/issues?q=author%3Aavive" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/jpnovochadlo"><img src="https://avatars.githubusercontent.com/u/69369894?v=4?s=100" width="100px;" alt="jpnovochadlo"/><br /><sub><b>jpnovochadlo</b></sub></a><br /><a href="#business-jpnovochadlo" title="Business development">💼</a> <a href="#design-jpnovochadlo" title="Design">🎨</a> <a href="https://github.com/snowpinelabs/polkadart/commits?author=jpnovochadlo" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/tallesborges"><img src="https://avatars.githubusercontent.com/u/3486359?v=4?s=100" width="100px;" alt="Talles "/><br /><sub><b>Talles </b></sub></a><br /><a href="https://github.com/snowpinelabs/polkadart/commits?author=tallesborges" title="Code">💻</a> <a href="https://github.com/snowpinelabs/polkadart/commits?author=tallesborges" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://r3lab.com"><img src="https://avatars.githubusercontent.com/u/49204989?v=4?s=100" width="100px;" alt="Burak"/><br /><sub><b>Burak</b></sub></a><br /><a href="https://github.com/snowpinelabs/polkadart/commits?author=buraktabn" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/vjrj"><img src="https://avatars.githubusercontent.com/u/180085?v=4?s=100" width="100px;" alt="vjrj"/><br /><sub><b>vjrj</b></sub></a><br /><a href="https://github.com/snowpinelabs/polkadart/commits?author=vjrj" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
@@ -286,9 +286,9 @@ This project is licensed under the [Apache 2.0 License](LICENSE)
 Ready to build your next blockchain application? Here's where to go:
 
 - 📖 [Read the Documentation](https://polkadart.dev) - Complete guides and tutorials
-- 💻 [Explore Examples](https://github.com/leonardocustodio/polkadart/tree/main/apps/examples) - Working code samples
+- 💻 [Explore Examples](https://github.com/snowpinelabs/polkadart/tree/main/apps/examples) - Working code samples
 - 💬 [Join the Community](https://matrix.to/#/%23polkadart:matrix.org) - Get help and share ideas
-- ⭐ [Star the Project](https://github.com/leonardocustodio/polkadart) - Show your support!
+- ⭐ [Star the Project](https://github.com/snowpinelabs/polkadart) - Show your support!
 
 ---
 

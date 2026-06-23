@@ -57,7 +57,10 @@ class StatementStoreConfig {
     this.maxSeenStatements = 65536,
     this.falsePositiveRate = 0.01,
     this.affinityUpdateIntervalMs = 1000,
-  }) : assert(maxSeenStatements > 0, 'maxSeenStatements must be greater than zero'),
+  }) : assert(
+         maxSeenStatements > 0,
+         'maxSeenStatements must be greater than zero',
+       ),
        assert(
          falsePositiveRate > 0.0 && falsePositiveRate < 1.0,
          'falsePositiveRate must be within the open interval (0, 1)',

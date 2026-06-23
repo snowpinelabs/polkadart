@@ -1,8 +1,8 @@
 name: ink_cli
 description: ink_cli is a command line interface for ink! smart contracts. Generates code to interact with ink! smart contracts.
 version: 1.0.0
-homepage: https://github.com/leonardocustodio/polkadart/tree/main/packages/ink_cli
-repository: https://github.com/leonardocustodio/polkadart
+homepage: https://github.com/snowpinelabs/polkadart/tree/main/packages/ink_cli
+repository: https://github.com/snowpinelabs/polkadart
 resolution: workspace
 
 environment:

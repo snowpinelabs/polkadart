@@ -64,26 +64,28 @@ void main() {
       }
     });
 
-    test('adds a chain with the statement store enabled and stays operational',
-        () async {
-      client = SmoldotClient(config: SmoldotConfig(maxLogLevel: 3));
-      await client.initialize();
+    test(
+      'adds a chain with the statement store enabled and stays operational',
+      () async {
+        client = SmoldotClient(config: SmoldotConfig(maxLogLevel: 3));
+        await client.initialize();
 
-      final spec = await File('test/fixtures/westend.json').readAsString();
+        final spec = await File('test/fixtures/westend.json').readAsString();
 
-      // Enabling the statement-store protocol must not break add_chain: the native
-      // layer parses the config, builds StatementProtocolConfig (with a random bloom
-      // seed) and the chain must still answer spec-derived JSON-RPC immediately.
-      final chain = await client.addChain(
-        AddChainConfig(
-          chainSpec: spec,
-          statementStore: const StatementStoreConfig(),
-        ),
-      );
+        // Enabling the statement-store protocol must not break add_chain: the native
+        // layer parses the config, builds StatementProtocolConfig (with a random bloom
+        // seed) and the chain must still answer spec-derived JSON-RPC immediately.
+        final chain = await client.addChain(
+          AddChainConfig(
+            chainSpec: spec,
+            statementStore: const StatementStoreConfig(),
+          ),
+        );
 
-      final name = await chain.request('system_chain', []);
-      expect(name.isSuccess, isTrue);
-      expect(name.result, equals('Westend'));
-    });
+        final name = await chain.request('system_chain', []);
+        expect(name.isSuccess, isTrue);
+        expect(name.result, equals('Westend'));
+      },
+    );
   });
 }

@@ -1,3 +1,6 @@
+@Tags(['network'])
+library;
+
 import 'dart:io';
 import 'package:test/test.dart';
 import 'package:smoldot/smoldot.dart';

@@ -43,7 +43,7 @@ Before you begin, ensure you have the following installed:
    ```
 3. **Add upstream remote**:
    ```bash
-   git remote add upstream https://github.com/leonardocustodio/polkadart.git
+   git remote add upstream https://github.com/snowpinelabs/polkadart.git
    ```
 
 ## Development Setup

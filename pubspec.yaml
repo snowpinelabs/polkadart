@@ -1,5 +1,5 @@
 name: polkadart_workspace
-repository: https://github.com/leonardocustodio/polkadart
+repository: https://github.com/snowpinelabs/polkadart
 publish_to: none
 environment:
   sdk: ^3.8.0
@@ -31,12 +31,16 @@ melos:
         flutter: false
 
     test:
-      description: Run tests excluding chain tests (chain tests require local data setup)
-      run: dart run melos exec --scope="${SCOPE:-*}" -c 1 -- 'dart test --no-chain-stack-traces --ignore-timeouts --coverage="coverage" --concurrency=1 --exclude-tags=chain'
+      description: Run tests excluding chain and network tests (these need local data setup or live p2p connectivity)
+      run: dart run melos exec --scope="${SCOPE:-*}" -c 1 -- 'dart test --no-chain-stack-traces --ignore-timeouts --coverage="coverage" --concurrency=1 --exclude-tags=chain --exclude-tags=network'
 
     test:chain:
       description: Run chain tests only
       run: dart test packages/substrate_metadata/test/chain_tests/ --no-chain-stack-traces --concurrency=1
+
+    test:network:
+      description: Run smoldot network tests only (live p2p; slow, requires connectivity)
+      run: dart test packages/smoldot/test --no-chain-stack-traces --ignore-timeouts --concurrency=1 --tags=network
 
     coverage:
       run: dart run melos exec --scope="${SCOPE:-*}" -c 1 -- 'dart run coverage:format_coverage --lcov --in=coverage --out=coverage/coverage.lcov --report-on=lib'

@@ -1,8 +1,8 @@
 name: polkadart
 description: Polkadart is a set of packages that provides a high-level interface for interacting with Polkadot, you can query storage, submit extrinsics, make RPC calls and much more. #polkadot #blockchain
 version: 1.1.0
-homepage: https://github.com/leonardocustodio/polkadart/tree/main/packages/polkadart
-repository: https://github.com/leonardocustodio/polkadart
+homepage: https://github.com/snowpinelabs/polkadart/tree/main/packages/polkadart
+repository: https://github.com/snowpinelabs/polkadart
 resolution: workspace
 
 environment:

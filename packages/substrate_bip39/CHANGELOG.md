@@ -8,7 +8,7 @@
 
 ## 0.7.1
 
- - **FIX**: Entropy property on newer library version ([#691](https://github.com/leonardocustodio/polkadart/issues/691)).
+ - **FIX**: Entropy property on newer library version ([#691](https://github.com/snowpinelabs/polkadart/issues/691)).
 
 ## 0.7.0
 

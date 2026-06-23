@@ -13,7 +13,7 @@ void main() {
       final version = bindings.getVersion();
       print('Smoldot FFI version: $version');
       expect(version, isNotEmpty);
-      expect(version, equals('0.1.0')); // From Cargo.toml
+      expect(version, equals('1.2.0')); // From Cargo.toml
     });
 
     test('should initialize client with config', () {

@@ -846,7 +846,7 @@ print('${status.approvals.length}/${status.threshold} approvals');
 
 ## Resources
 
-- [Polkadart Repository](https://github.com/leonardocustodio/polkadart)
+- [Polkadart Repository](https://github.com/snowpinelabs/polkadart)
 - [Polkadot Documentation](https://docs.polkadot.com/)
 
 ## License
