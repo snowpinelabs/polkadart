@@ -28,6 +28,7 @@ typedef SmoldotAddChainNative =
       Pointer<ChainHandle> potentialRelayChains,
       Int32 relayCount,
       Pointer<Utf8> databaseContent,
+      Pointer<Utf8> statementConfigJson,
       Int64 callbackId,
       Pointer<NativeFunction<DartCallbackNative>> callback,
       Pointer<Pointer<Utf8>> errorOut,
@@ -39,6 +40,7 @@ typedef SmoldotAddChainDart =
       Pointer<Uint64> potentialRelayChains,
       int relayCount,
       Pointer<Utf8> databaseContent,
+      Pointer<Utf8> statementConfigJson,
       int callbackId,
       Pointer<NativeFunction<DartCallbackNative>> callback,
       Pointer<Pointer<Utf8>> errorOut,
@@ -210,6 +212,7 @@ class SmoldotBindings {
     required Pointer<NativeFunction<DartCallbackNative>> callback,
     List<int>? potentialRelayChains,
     String? databaseContent,
+    String? statementConfigJson,
   }) {
     final chainSpecPtr = chainSpecJson.toNativeUtf8(allocator: _allocator);
     final errorOutPtr = _allocator<Pointer<Utf8>>();
@@ -217,6 +220,7 @@ class SmoldotBindings {
 
     Pointer<Uint64>? relayChainPtr;
     Pointer<Utf8>? dbContentPtr;
+    Pointer<Utf8>? statementConfigPtr;
 
     try {
       // Handle relay chains
@@ -232,12 +236,20 @@ class SmoldotBindings {
         dbContentPtr = databaseContent.toNativeUtf8(allocator: _allocator);
       }
 
+      // Handle optional statement-store configuration
+      if (statementConfigJson != null) {
+        statementConfigPtr = statementConfigJson.toNativeUtf8(
+          allocator: _allocator,
+        );
+      }
+
       final result = _addChain(
         clientHandle,
         chainSpecPtr,
         relayChainPtr ?? nullptr,
         potentialRelayChains?.length ?? 0,
         dbContentPtr ?? nullptr,
+        statementConfigPtr ?? nullptr,
         callbackId,
         callback,
         errorOutPtr,
@@ -257,6 +269,7 @@ class SmoldotBindings {
       _allocator.free(errorOutPtr);
       if (relayChainPtr != null) _allocator.free(relayChainPtr);
       if (dbContentPtr != null) _allocator.free(dbContentPtr);
+      if (statementConfigPtr != null) _allocator.free(statementConfigPtr);
     }
   }
 

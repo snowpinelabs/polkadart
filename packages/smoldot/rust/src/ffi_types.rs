@@ -72,6 +72,42 @@ pub struct AddChainConfigJson {
     pub disable_json_rpc: bool,
 }
 
+/// Statement-store configuration (JSON-serializable).
+///
+/// Mirrors the `statementStore` option of the official smoldot JS bindings. The presence of this
+/// object (passed via the `statement_config_json` FFI argument) enables the statement-store
+/// networking protocol on the chain. The bloom-filter seed is generated randomly and is therefore
+/// not configurable here, matching upstream behaviour.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StatementStoreConfigJson {
+    /// Maximum number of seen statements to cache per subscription. Defaults to 65536.
+    #[serde(default = "default_max_seen_statements")]
+    pub max_seen_statements: u64,
+
+    /// Bloom-filter false-positive rate used for topic affinity. Must be in `(0, 1)`.
+    /// Defaults to 0.01 (1%).
+    #[serde(default = "default_false_positive_rate")]
+    pub false_positive_rate: f64,
+
+    /// Debounce interval (milliseconds) for sending affinity filter updates to peers.
+    /// Must be greater than zero. Defaults to 1000.
+    #[serde(default = "default_affinity_update_interval_ms")]
+    pub affinity_update_interval_ms: u64,
+}
+
+fn default_max_seen_statements() -> u64 {
+    65536
+}
+
+fn default_false_positive_rate() -> f64 {
+    0.01
+}
+
+fn default_affinity_update_interval_ms() -> u64 {
+    1000
+}
+
 /// Log message from smoldot
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]

@@ -1,3 +1,6 @@
+@Tags(['network'])
+library;
+
 import 'dart:io';
 import 'dart:async';
 import 'package:test/test.dart';
@@ -57,7 +60,9 @@ void main() {
 
       // Wait for at least 2 blocks (with timeout)
       await completer.future.timeout(
-        Duration(seconds: 30),
+        // Westend warp-sync can take ~60s before the first head is produced;
+        // allow ample headroom so the assertion reflects functionality, not sync latency.
+        Duration(seconds: 180),
         onTimeout: () {
           sub?.cancel();
           if (blocks.isEmpty) {
@@ -97,7 +102,9 @@ void main() {
 
       // Wait for at least 1 finalized block (with timeout)
       await completer.future.timeout(
-        Duration(seconds: 30),
+        // Westend warp-sync can take ~60s before the first head is produced;
+        // allow ample headroom so the assertion reflects functionality, not sync latency.
+        Duration(seconds: 180),
         onTimeout: () {
           sub?.cancel();
           if (blocks.isEmpty) {
@@ -148,7 +155,9 @@ void main() {
 
       // Wait for both subscriptions to get at least one notification
       await completer.future.timeout(
-        Duration(seconds: 30),
+        // Westend warp-sync can take ~60s before the first head is produced;
+        // allow ample headroom so the assertion reflects functionality, not sync latency.
+        Duration(seconds: 180),
         onTimeout: () {
           subscription1?.cancel();
           subscription2?.cancel();

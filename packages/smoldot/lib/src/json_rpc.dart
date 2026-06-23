@@ -345,4 +345,45 @@ class SubstrateRpcMethods {
 
   /// Unsubscribe from extrinsic status updates
   static const authorUnwatchExtrinsic = 'author_unwatchExtrinsic';
+
+  // ===== New JSON-RPC API (smoldot-light >= 1.0) =====
+  // These are reachable today through [Chain.request] / [Chain.subscribe] with no extra
+  // native work; the constants are provided for convenience and discoverability.
+
+  /// chainHead v1: follow the head of the chain (JSON-RPC v2 / "new" API).
+  static const chainHeadV1Follow = 'chainHead_v1_follow';
+
+  /// chainHead v1: read storage entries at a followed block. Since smoldot 1.2.0 this can also
+  /// read the default child trie (e.g. contract storage) via the optional `childTrie` parameter.
+  static const chainHeadV1Storage = 'chainHead_v1_storage';
+
+  /// chainHead v1: call a runtime entry point at a followed block.
+  static const chainHeadV1Call = 'chainHead_v1_call';
+
+  /// chainHead v1: stop a previously started operation.
+  static const chainHeadV1StopOperation = 'chainHead_v1_stopOperation';
+
+  /// chainHead v1: stop following the chain.
+  static const chainHeadV1Unfollow = 'chainHead_v1_unfollow';
+
+  /// transaction v1: submit and watch a transaction (JSON-RPC v2 / "new" API).
+  static const transactionV1Broadcast = 'transaction_v1_broadcast';
+
+  /// transactionWatch v1: submit and watch a transaction's progress.
+  static const transactionWatchV1SubmitAndWatch =
+      'transactionWatch_v1_submitAndWatch';
+
+  /// Bitswap: fetch an IPFS block by CID over the chain's p2p network (smoldot >= 3.1.0).
+  static const bitswapV1Get = 'bitswap_v1_get';
+
+  // ----- Statement store (requires AddChainConfig.statementStore to be enabled) -----
+
+  /// Submit a statement to the statement store.
+  static const statementSubmit = 'statement_submit';
+
+  /// Subscribe to statements matching a set of topics.
+  static const statementSubscribeStatement = 'statement_subscribeStatement';
+
+  /// Unsubscribe from a statement subscription.
+  static const statementUnsubscribeStatement = 'statement_unsubscribeStatement';
 }

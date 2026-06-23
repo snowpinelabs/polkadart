@@ -88,6 +88,10 @@ jobs:
               - 'packages/ink_cli/**'
               - 'pubspec.yaml'
               - 'melos.yaml'
+            smoldot:
+              - 'packages/smoldot/**'
+              - 'pubspec.yaml'
+              - 'melos.yaml'
 
   # Run tests only for changed packages
   test:
@@ -170,6 +174,18 @@ jobs:
           cd apps/examples
           dart run polkadart_cli:generate -v
           cd ../..
+
+      # smoldot ships a Rust FFI native library that must be compiled before its tests can load it.
+      # The toolchain version is pinned by packages/smoldot/rust/rust-toolchain.toml (edition 2024).
+      - name: Cache smoldot Rust build
+        if: ${{ matrix.package == 'smoldot' }}
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/smoldot/rust
+
+      - name: Build smoldot native library
+        if: ${{ matrix.package == 'smoldot' }}
+        run: bash packages/smoldot/tool/build_rust.sh
 
       - name: Check format
         run: |

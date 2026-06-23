@@ -1,8 +1,8 @@
 name: ink_abi
 description: ink! abi encoder and decoder
 version: 1.0.1
-homepage: https://github.com/leonardocustodio/polkadart/tree/main/packages/ink_abi
-repository: https://github.com/leonardocustodio/polkadart
+homepage: https://github.com/snowpinelabs/polkadart/tree/main/packages/ink_abi
+repository: https://github.com/snowpinelabs/polkadart
 resolution: workspace
 
 environment:

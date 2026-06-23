@@ -122,6 +122,7 @@ export 'src/types.dart'
     show
         SmoldotConfig,
         AddChainConfig,
+        StatementStoreConfig,
         JsonRpcResponse,
         JsonRpcError,
         ChainStatus,

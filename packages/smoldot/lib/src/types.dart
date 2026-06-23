@@ -30,6 +30,53 @@ class SmoldotConfig {
   };
 }
 
+/// Configuration for the statement-store networking protocol on a chain.
+///
+/// Passing a [StatementStoreConfig] to [AddChainConfig.statementStore] enables Substrate's
+/// statement-store protocol (statement distribution + the associated JSON-RPC methods) for that
+/// chain. When omitted, the protocol stays disabled, preserving the default behaviour.
+///
+/// Mirrors the `statementStore` option of the official smoldot JS bindings. The bloom-filter seed
+/// is generated randomly by the native layer and is intentionally not configurable.
+@immutable
+class StatementStoreConfig {
+  /// Maximum number of seen statements to cache per subscription. Must be greater than zero.
+  final int maxSeenStatements;
+
+  /// Bloom-filter false-positive rate used for topic affinity. Must be within `(0, 1)`.
+  ///
+  /// Lower values reduce bandwidth from irrelevant statements but reveal more about your
+  /// subscription interests to peers.
+  final double falsePositiveRate;
+
+  /// Debounce interval, in milliseconds, for sending affinity filter updates to peers after
+  /// subscription changes. Must be greater than zero.
+  final int affinityUpdateIntervalMs;
+
+  const StatementStoreConfig({
+    this.maxSeenStatements = 65536,
+    this.falsePositiveRate = 0.01,
+    this.affinityUpdateIntervalMs = 1000,
+  }) : assert(
+         maxSeenStatements > 0,
+         'maxSeenStatements must be greater than zero',
+       ),
+       assert(
+         falsePositiveRate > 0.0 && falsePositiveRate < 1.0,
+         'falsePositiveRate must be within the open interval (0, 1)',
+       ),
+       assert(
+         affinityUpdateIntervalMs > 0,
+         'affinityUpdateIntervalMs must be greater than zero',
+       );
+
+  Map<String, dynamic> toJson() => {
+    'maxSeenStatements': maxSeenStatements,
+    'falsePositiveRate': falsePositiveRate,
+    'affinityUpdateIntervalMs': affinityUpdateIntervalMs,
+  };
+}
+
 /// Configuration for adding a chain to the smoldot client
 @immutable
 class AddChainConfig {
@@ -45,11 +92,15 @@ class AddChainConfig {
   /// Disable JSON-RPC for this chain
   final bool disableJsonRpc;
 
+  /// If set, enables the statement-store protocol on this chain. Disabled when `null`.
+  final StatementStoreConfig? statementStore;
+
   const AddChainConfig({
     required this.chainSpec,
     this.databaseContent,
     this.potentialRelayChains,
     this.disableJsonRpc = false,
+    this.statementStore,
   });
 
   Map<String, dynamic> toJson() => {
@@ -58,6 +109,7 @@ class AddChainConfig {
     if (potentialRelayChains != null && potentialRelayChains!.isNotEmpty)
       'potentialRelayChains': potentialRelayChains,
     'disableJsonRpc': disableJsonRpc,
+    if (statementStore != null) 'statementStore': statementStore!.toJson(),
   };
 }
 

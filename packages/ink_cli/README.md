@@ -401,7 +401,7 @@ environment:
 
 ## Resources
 
-- [Polkadart Repository](https://github.com/leonardocustodio/polkadart)
+- [Polkadart Repository](https://github.com/snowpinelabs/polkadart)
 - [ink! Documentation](https://use.ink/)
 - [Substrate Contracts Pallet](https://docs.polkadot.com)
 

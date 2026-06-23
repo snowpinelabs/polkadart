@@ -1,8 +1,8 @@
 name: polkadart_keyring
 description: Substrate Keyring.
 version: 0.7.2
-homepage: https://github.com/leonardocustodio/polkadart/tree/main/packages/polkadart_keyring
-repository: https://github.com/leonardocustodio/polkadart
+homepage: https://github.com/snowpinelabs/polkadart/tree/main/packages/polkadart_keyring
+repository: https://github.com/snowpinelabs/polkadart
 resolution: workspace
 
 environment:

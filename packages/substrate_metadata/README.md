@@ -772,7 +772,7 @@ print('Loaded: ${stats['loadedConstants']}/${stats['totalConstants']}');
 
 ## Resources
 
-- [Polkadart Repository](https://github.com/leonardocustodio/polkadart)
+- [Polkadart Repository](https://github.com/snowpinelabs/polkadart)
 - [Polkadot Documentation](https://docs.polkadot.com/)
 - [SCALE Codec Specification](https://docs.polkadot.com/polkadot-protocol/basics/data-encoding/)
 - [Substrate Metadata](https://docs.substrate.io/build/application-dev/#metadata-system)
