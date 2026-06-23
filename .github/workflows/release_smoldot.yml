@@ -1,0 +1,186 @@
+name: release smoldot
+
+# Runs on a smoldot version tag (e.g. `smoldot-v1.2.0`): builds the prebuilt native library (cdylib)
+# for every supported DESKTOP target (Linux/macOS/Windows on x64+arm64), signs each with Ed25519,
+# and uploads the `smoldot-<target>.<ext>` + `.sig` assets to the tag's GitHub Release. Pure-Dart
+# consumers then run `dart run smoldot:setup` to download + verify a signed binary instead of
+# compiling. Finally publishes the package to pub.dev.
+#
+# Mobile (Android/iOS) is NOT a pure-`dart run` target and ships no prebuilt here; those libraries
+# are embedded in the host app build (see BUILD.md). Add their targets to release_smoldot.yml and
+# currentPrebuiltTarget() once that pipeline exists.
+#
+# This is a monorepo, so the tag is package-scoped (`smoldot-v<version>`) rather than a bare
+# `v<version>` — that keeps smoldot's release/assets separate from the other packages.
+#
+# Required secrets:
+#   SMOLDOT_SIGNING_KEY - Ed25519 signing seed (hex). Its public half is kPrebuiltPublicKeyHex in
+#                         packages/smoldot/lib/src/prebuilt.dart. Generate the pair with:
+#                         cd packages/smoldot && dart run tool/gen_key.dart
+#   (GITHUB_TOKEN is provided automatically; needs contents:write — set below.)
+# pub.dev publishing uses OIDC: the `publish` job runs in the `pub.dev` GitHub Actions environment
+# (configured under pub.dev's "Automated publishing" with tag pattern `smoldot-v{{version}}`); no
+# pub.dev token is stored in the repo.
+
+on:
+  push:
+    tags: ['smoldot-v[0-9]+.[0-9]+.[0-9]+*']
+
+permissions:
+  contents: write   # create the release + upload prebuilt assets
+  id-token: write   # pub.dev OIDC publishing
+
+env:
+  CARGO_TERM_COLOR: always
+  # Where the smoldot package lives within the monorepo.
+  PKG: packages/smoldot
+
+jobs:
+  gate:
+    name: analyze
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - run: dart pub get
+      - run: dart analyze packages/smoldot
+
+  create-release:
+    name: ensure release exists
+    needs: gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # The prebuilt assets attach to the tag's Release, so create it first (idempotently) with the
+      # CHANGELOG.md section as notes.
+      - name: Create the release if it does not exist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="$GITHUB_REF_NAME"               # e.g. smoldot-v1.2.0
+          version="${tag#smoldot-v}"           # e.g. 1.2.0
+          # Pull the "## <version>" section body from the package CHANGELOG (up to the next heading).
+          awk -v ver="## $version" '
+            index($0, ver) == 1 { flag = 1; next }
+            /^## / && flag { exit }
+            flag { print }
+          ' "$PKG/CHANGELOG.md" > notes.md
+          [ -s notes.md ] || echo "smoldot $version. Prebuilt native libraries are attached below." > notes.md
+          if ! gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release create "$tag" --repo "$GITHUB_REPOSITORY" --title "$tag" \
+              --notes-file notes.md --verify-tag
+          else
+            gh release edit "$tag" --repo "$GITHUB_REPOSITORY" --title "$tag" --notes-file notes.md
+          fi
+
+  prebuilt:
+    name: prebuilt ${{ matrix.name }}
+    needs: create-release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Desktop cdylibs are the only assets `dart run smoldot:setup` downloads.
+          - name: macos
+            os: macos-latest
+            ext: dylib
+            targets: aarch64-apple-darwin x86_64-apple-darwin
+          - name: linux
+            os: ubuntu-latest
+            ext: so
+            targets: x86_64-unknown-linux-gnu aarch64-unknown-linux-gnu
+          - name: windows
+            os: windows-latest
+            ext: dll
+            targets: x86_64-pc-windows-msvc aarch64-pc-windows-msvc
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      # Matches rust/rust-toolchain.toml (channel 1.96.0; smoldot-light 1.2.0 needs rustc >= 1.85).
+      - uses: dtolnay/rust-toolchain@1.96.0
+        with:
+          targets: ${{ matrix.targets }}
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Install signing deps
+        run: dart pub get   # cryptography, for tool/sign_prebuilt.dart
+
+      # --- Linux: zig + cargo-zigbuild for a portable glibc floor + arm64 cross ---
+      - if: matrix.name == 'linux'
+        uses: mlugg/setup-zig@v2
+        with: { version: 0.13.0 }
+      - if: matrix.name == 'linux'
+        run: cargo install cargo-zigbuild
+
+      - name: Build, sign, and upload prebuilt libraries
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SMOLDOT_SIGNING_KEY: ${{ secrets.SMOLDOT_SIGNING_KEY }}
+        run: |
+          set -euo pipefail
+          tag="$GITHUB_REF_NAME"
+          # Collect the libraries (as absolute paths) so the signer can run from the package dir.
+          assets=()        # absolute paths to each library
+          for t in ${{ matrix.targets }}; do
+            echo "::group::build $t"
+            if [ "${{ matrix.name }}" = "linux" ]; then
+              # `.2.17` pins a portable glibc floor; output still lands in target/$t/release.
+              cargo zigbuild --release --manifest-path "$PKG/rust/Cargo.toml" --target "$t.2.17"
+            else
+              cargo build --release --manifest-path "$PKG/rust/Cargo.toml" --target "$t"
+            fi
+            echo "::endgroup::"
+            case "${{ matrix.name }}" in
+              macos)   src="$PKG/rust/target/$t/release/libsmoldot.dylib" ;;
+              linux)   src="$PKG/rust/target/$t/release/libsmoldot.so" ;;
+              windows) src="$PKG/rust/target/$t/release/smoldot.dll" ;;
+            esac
+            asset="$GITHUB_WORKSPACE/smoldot-$t.${{ matrix.ext }}"
+            cp "$src" "$asset"
+            assets+=("$asset")
+          done
+          # Emit a detached <asset>.sig next to each library (the tool lives in the package dir).
+          ( cd "$PKG" && dart run tool/sign_prebuilt.dart "${assets[@]}" )
+          uploads=()
+          for a in "${assets[@]}"; do uploads+=("$a" "$a.sig"); done
+          gh release upload "$tag" "${uploads[@]}" --clobber --repo "$GITHUB_REPOSITORY"
+
+  publish:
+    name: publish to pub.dev
+    needs: prebuilt
+    # Opt-in: stays skipped until you set the repository variable SMOLDOT_AUTOPUBLISH=true. This lets
+    # a release build + upload prebuilts without CI also trying to publish (e.g. when you publish the
+    # first version manually). Enable it once pub.dev automated publishing is configured.
+    if: vars.SMOLDOT_AUTOPUBLISH == 'true'
+    runs-on: ubuntu-latest
+    # pub.dev's automated publishing requires the run to come from this GitHub Actions environment;
+    # the OIDC id-token (granted at the workflow level) is exchanged for short-lived pub.dev creds,
+    # so no pub.dev token is stored in the repo. Configure it on pub.dev with the tag pattern
+    # `smoldot-v{{version}}` before enabling SMOLDOT_AUTOPUBLISH.
+    environment: pub.dev
+    defaults:
+      run:
+        working-directory: packages/smoldot
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - run: dart pub get
+      - name: Publish if this version is new
+        shell: bash
+        run: |
+          set -euo pipefail
+          ver=$(grep '^version:' pubspec.yaml | awk '{print $2}')
+          code=$(curl -s -o /dev/null -w '%{http_code}' "https://pub.dev/api/packages/smoldot/versions/$ver")
+          if [ "$code" = "200" ]; then
+            echo "smoldot $ver already on pub.dev — skipping publish (idempotent)."
+          else
+            dart pub publish --force
+          fi

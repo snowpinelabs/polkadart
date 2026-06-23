@@ -13,6 +13,9 @@ dependencies:
   meta: ^1.18.1
   path: ^1.9.0
   convert: ^3.1.1
+  # Ed25519 verification of the signed prebuilt native library downloaded by
+  # `dart run smoldot:setup` (bin/setup.dart); also used by tool/sign_prebuilt.dart.
+  cryptography: ^2.9.0
 
 dev_dependencies:
   lints: 6.1.0

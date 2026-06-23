@@ -1,6 +1,7 @@
 import 'dart:ffi';
 import 'dart:io';
 import 'package:path/path.dart' as path;
+import 'prebuilt.dart';
 import 'types.dart';
 
 /// Platform-specific library loading and path resolution
@@ -91,7 +92,30 @@ class SmoldotPlatform {
 
   /// Get the package library path for the given library name
   static String? _getPackageLibraryPath(String libraryName) {
-    // Common locations to search for native libraries
+    // 1. Library installed by `dart run smoldot:setup` into the per-user cache (desktop only).
+    final target = currentPrebuiltTarget();
+    if (target != null) {
+      final cachePath = prebuiltCacheLibPath(target);
+      if (File(cachePath).existsSync()) {
+        return cachePath;
+      }
+    }
+
+    // 2. Local `cargo build` output, for developing against the Rust crate directly. cwd is the
+    //    package/repo root during `dart test`, or the example dir when running an example.
+    final devPaths = <String>[
+      path.join(Directory.current.path, 'rust', 'target', 'release', libraryName),
+      path.join(Directory.current.path, 'rust', 'target', 'debug', libraryName),
+      path.join(Directory.current.path, '..', 'rust', 'target', 'release', libraryName),
+      path.join(Directory.current.path, '..', 'rust', 'target', 'debug', libraryName),
+    ];
+    for (final devPath in devPaths) {
+      if (File(devPath).existsSync()) {
+        return devPath;
+      }
+    }
+
+    // 3. Conventional locations alongside the package (build_rust.sh copies into native/<platform>).
     final searchPaths = <String>[
       // Current directory
       Directory.current.path,

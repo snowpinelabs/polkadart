@@ -20,12 +20,32 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  smoldot: ^0.1.0
+  smoldot: ^1.2.0
 ```
+
+Then download the prebuilt native library for your platform — no Rust toolchain required:
+
+```bash
+dart run smoldot:setup
+```
+
+This fetches the signed `smoldot-light` library from the matching GitHub Release, verifies its
+Ed25519 signature, and installs it into a per-user cache that `SmoldotClient` loads automatically.
+Re-run it after upgrading the package (the cache is keyed by version). Flags:
+
+- `--force` — re-download even if already installed.
+- `--no-verify` — skip the signature check (not recommended).
+
+Override the cache root with the `SMOLDOT_CACHE_DIR` environment variable.
 
 ## Prerequisites
 
-This package requires the native smoldot-light library to be available. The Rust FFI bridge must be built and installed before using this package.
+`dart run smoldot:setup` ships prebuilt libraries for **desktop** platforms (Linux, macOS, and
+Windows on x64 + arm64). On those platforms nothing else is needed.
+
+For mobile (Android/iOS) — or any platform without a prebuilt, or to develop against the Rust
+crate directly — build the native library from source instead; see [BUILD.md](BUILD.md). The loader
+also picks up a local `cargo build` from `rust/target/{debug,release}/`.
 
 ## Usage
 

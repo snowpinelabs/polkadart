@@ -13,6 +13,10 @@
   statement-store protocol per chain (new in smoldot-light 1.0.0); disabled by default
 - Added `SubstrateRpcMethods` constants for the newer JSON-RPC API now available
   (`chainHead_v1_*`, `transaction_v1_*`, `bitswap_v1_get`, `statement_*`)
+- Added `dart run smoldot:setup` (`bin/setup.dart`) to download a signed prebuilt native library
+  for the current desktop platform from the GitHub Release, verify its Ed25519 signature, and
+  install it into a per-user cache the loader finds automatically — no Rust toolchain required.
+  Currently covers desktop Linux/macOS/Windows on x64+arm64; mobile prebuilts come later
 
 ## 0.1.2
 
