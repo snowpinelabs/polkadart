@@ -203,7 +203,39 @@ AddChainConfig(
   databaseContent: '...',              // Optional: Restore from database
   potentialRelayChains: ['...'],      // Optional: Relay chain IDs
   disableJsonRpc: false,               // Optional: Disable JSON-RPC
+  statementStore: StatementStoreConfig(// Optional: enable the statement-store protocol
+    maxSeenStatements: 65536,          //   per-subscription dedup cache (default 65536)
+    falsePositiveRate: 0.01,           //   topic-affinity bloom FPR, in (0,1) (default 0.01)
+    affinityUpdateIntervalMs: 1000,    //   affinity update debounce in ms (default 1000)
+  ),
 )
+```
+
+## JSON-RPC API
+
+`Chain` is a transport for arbitrary JSON-RPC. Use [`chain.request(method, params)`](#chain) for
+calls and [`chain.subscribe(method, params)`](#chain) for subscriptions; both the legacy Substrate
+API and smoldot's newer JSON-RPC v2 (`chainHead`/`transaction`) API are available. Common method
+names are exposed as constants on `SubstrateRpcMethods`.
+
+Capabilities added by `smoldot-light` 1.x (all reachable through the generic request/subscribe pump,
+no extra setup beyond what's noted):
+
+- **`chainHead_v1_*` / `transaction_v1_*` / `transactionWatch_v1_*`** — the recommended JSON-RPC v2
+  API for following the chain head, reading storage, and broadcasting transactions.
+- **`chainHead_v1_storage` child-trie reads** — pass the optional `childTrie` parameter to read the
+  default child trie directly (e.g. contract storage) without a runtime call.
+- **`bitswap_v1_get`** — fetch an IPFS/Bitswap block by CID over the chain's p2p network.
+- **Statement store** (`statement_submit`, `statement_subscribeStatement`,
+  `statement_unsubscribeStatement`) — only functional when the chain was added with
+  `AddChainConfig.statementStore` set; otherwise these calls return an error.
+
+```dart
+// Enable the statement store, then submit/subscribe to statements.
+final chain = await client.addChain(
+  AddChainConfig(chainSpec: spec, statementStore: const StatementStoreConfig()),
+);
+await chain.request(SubstrateRpcMethods.statementSubmit, ['0x...']);
 ```
 
 ## Platform Support

@@ -52,6 +52,7 @@ int smoldot_add_chain(SmoldotClientHandle client_handle,
                       const SmoldotChainHandle *potential_relay_chains,
                       int relay_chains_count,
                       const char *database_content,
+                      const char *statement_config_json,
                       int64_t callback_id,
                       SmoldotDartCallback callback,
                       char **error_out);

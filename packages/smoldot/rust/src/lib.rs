@@ -6,12 +6,16 @@
 use parking_lot::Mutex;
 use smoldot_light::{
     AddChainConfig, AddChainConfigJsonRpc, AddChainSuccess, ChainId, Client,
-    JsonRpcResponses, platform::DefaultPlatform,
+    JsonRpcResponses,
+    network_service::StatementProtocolConfig,
+    platform::{DefaultPlatform, PlatformRef},
 };
 use std::collections::HashMap;
 use std::ffi::{CStr, CString};
+use std::num::NonZeroUsize;
 use std::os::raw::{c_char, c_int};
 use std::sync::Arc;
+use std::time::Duration;
 use once_cell::sync::Lazy;
 
 mod error;
@@ -31,6 +35,9 @@ static CHAINS: Lazy<Mutex<HashMap<ChainHandle, Arc<SmoldotChainWrapper>>>> =
 struct SmoldotClientWrapper {
     client: Mutex<Client<Arc<DefaultPlatform>, ()>>,
     runtime: tokio::runtime::Runtime,
+    /// Clone of the platform handle, kept so we can source randomness (e.g. the
+    /// statement-store bloom-filter seed) the same way smoldot itself does.
+    platform: Arc<DefaultPlatform>,
 }
 
 /// Wrapper around Chain and ChainId
@@ -93,11 +100,12 @@ pub unsafe extern "C" fn smoldot_client_init(
         system_version.into(),
     );
 
-    let client = Client::new(platform);
+    let client = Client::new(platform.clone());
 
     let wrapper = Arc::new(SmoldotClientWrapper {
         client: Mutex::new(client),
         runtime,
+        platform,
     });
 
     // Generate handle
@@ -122,6 +130,7 @@ pub unsafe extern "C" fn smoldot_add_chain(
     potential_relay_chains: *const ChainHandle,
     relay_chains_count: c_int,
     database_content: *const c_char,
+    statement_config_json: *const c_char,
     callback_id: i64,
     callback: DartCallback,
     error_out: *mut *mut c_char,
@@ -181,6 +190,28 @@ pub unsafe extern "C" fn smoldot_add_chain(
         Vec::new()
     };
 
+    // Parse the optional statement-store configuration synchronously (so that any
+    // validation error is reported via `error_out` rather than asserting/aborting inside
+    // smoldot, which is compiled with `panic = "abort"`).
+    let statement_protocol_config = if !statement_config_json.is_null() {
+        let cfg_str = match CStr::from_ptr(statement_config_json).to_str() {
+            Ok(s) => s,
+            Err(_) => {
+                set_error(error_out, "Invalid UTF-8 in statement_config_json");
+                return -1;
+            }
+        };
+        match build_statement_config(cfg_str, &client_wrapper.platform) {
+            Ok(cfg) => Some(cfg),
+            Err(e) => {
+                set_error(error_out, &e);
+                return -1;
+            }
+        }
+    } else {
+        None
+    };
+
     // Clone Arc to move into async block
     let client_wrapper_clone = Arc::clone(&client_wrapper);
 
@@ -195,6 +226,9 @@ pub unsafe extern "C" fn smoldot_add_chain(
             potential_relay_chains: relay_chains.into_iter(),
             database_content: &db_content,
             user_data: (),
+            // Added in smoldot-light 1.0.0: opt-in statement-store networking protocol.
+            // `None` (the default) disables it, preserving the previous behaviour.
+            statement_protocol_config,
         };
 
         // Get mutable access to client (add_chain is NOT async in 0.18.0)
@@ -469,6 +503,49 @@ pub unsafe extern "C" fn smoldot_version() -> *mut c_char {
 }
 
 // Helper functions
+
+/// Parse, validate, and construct a [`StatementProtocolConfig`] from JSON.
+///
+/// Returns a human-readable error string instead of panicking, because
+/// `StatementProtocolConfig::new` asserts on invalid inputs and the crate is built with
+/// `panic = "abort"`. The bloom-filter seed is sourced from the platform's randomness, matching
+/// the behaviour of the official smoldot JS bindings.
+fn build_statement_config(
+    json: &str,
+    platform: &Arc<DefaultPlatform>,
+) -> Result<StatementProtocolConfig, String> {
+    let cfg: StatementStoreConfigJson = serde_json::from_str(json)
+        .map_err(|e| format!("Failed to parse statement config: {}", e))?;
+
+    let max_seen = usize::try_from(cfg.max_seen_statements).unwrap_or(usize::MAX);
+    let max_seen = NonZeroUsize::new(max_seen)
+        .ok_or_else(|| "statementStore.maxSeenStatements must be greater than zero".to_string())?;
+
+    if !(cfg.false_positive_rate.is_finite()
+        && cfg.false_positive_rate > 0.0
+        && cfg.false_positive_rate < 1.0)
+    {
+        return Err(
+            "statementStore.falsePositiveRate must be within the open interval (0, 1)".to_string(),
+        );
+    }
+
+    if cfg.affinity_update_interval_ms == 0 {
+        return Err("statementStore.affinityUpdateIntervalMs must be greater than zero".to_string());
+    }
+
+    // Random, non-user-configurable bloom-filter seed (matches upstream behaviour).
+    let mut seed_bytes = [0u8; 16];
+    platform.fill_random_bytes(&mut seed_bytes);
+    let bloom_seed = u128::from_le_bytes(seed_bytes);
+
+    Ok(StatementProtocolConfig::new(
+        max_seen,
+        cfg.false_positive_rate,
+        bloom_seed,
+        Duration::from_millis(cfg.affinity_update_interval_ms),
+    ))
+}
 
 fn generate_client_handle() -> ClientHandle {
     use std::sync::atomic::{AtomicU64, Ordering};

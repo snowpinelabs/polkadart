@@ -1,0 +1,6 @@
+# Pin a known-good stable toolchain for reproducible builds.
+# smoldot-light 1.2.0 and its dependencies use Rust edition 2024, which
+# requires rustc >= 1.85. This package itself stays on edition 2021.
+[toolchain]
+channel = "1.96.0"
+profile = "minimal"

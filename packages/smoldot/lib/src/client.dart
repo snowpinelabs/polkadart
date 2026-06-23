@@ -167,6 +167,11 @@ class SmoldotClient {
       // Prepare chain spec JSON
       final chainSpecJson = config.chainSpec;
 
+      // Serialize the optional statement-store config (enables the protocol when present)
+      final statementConfigJson = config.statementStore != null
+          ? jsonEncode(config.statementStore!.toJson())
+          : null;
+
       // Call FFI with callback
       _bindings.addChain(
         clientHandle: _clientHandle!,
@@ -175,6 +180,7 @@ class SmoldotClient {
         callback: _nativeCallback,
         potentialRelayChains: config.potentialRelayChains,
         databaseContent: config.databaseContent,
+        statementConfigJson: statementConfigJson,
       );
 
       // Wait for callback to complete
