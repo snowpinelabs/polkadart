@@ -1,6 +1,6 @@
 name: sr25519
-description: A sr25519 cryptography library in pure Dart
-version: 0.7.2
+description: sr25519 cryptography for Dart with two interchangeable backends — the audited Rust schnorrkel implementation (via FFI, default) and a pure-Dart implementation.
+version: 0.7.3
 homepage: https://github.com/snowpinelabs/polkadart/tree/main/packages/sr25519
 repository: https://github.com/snowpinelabs/polkadart
 resolution: workspace
@@ -11,8 +11,12 @@ environment:
 dependencies:
   collection: ^1.18.0
   convert: ^3.1.1
+  # Reused by bin/setup.dart and tool/sign_prebuilt.dart for Ed25519 verification of prebuilts.
   cryptography: ^2.9.0
+  # FFI to the audited Rust (schnorrkel) backend; pure Dart, no Flutter dependency.
+  ffi: ^2.2.0
   merlin: ^1.0.3
+  path: ^1.9.0
   ristretto255: ^1.0.2
   substrate_bip39: ^0.7.2
 

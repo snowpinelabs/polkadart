@@ -1,0 +1,5 @@
+# Pin a known-good stable toolchain for reproducible builds.
+# schnorrkel 0.11 builds on stable Rust; this matches the toolchain used elsewhere in the repo.
+[toolchain]
+channel = "1.96.0"
+profile = "minimal"

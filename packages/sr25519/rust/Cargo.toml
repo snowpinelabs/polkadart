@@ -1,0 +1,34 @@
+[package]
+name = "sr25519_ffi"
+version = "0.7.3"
+edition = "2021"
+authors = ["Polkadart Contributors"]
+license = "Apache-2.0"
+description = "FFI bindings for the audited schnorrkel sr25519 implementation (sp_core::sr25519-compatible)"
+
+[lib]
+# cdylib for the Dart FFI loader; staticlib for embedding into mobile host apps.
+crate-type = ["cdylib", "staticlib"]
+name = "sr25519"
+
+[dependencies]
+# The exact audited Schnorr/Ristretto25519 implementation that `sp_core::sr25519` wraps.
+# Using it directly (rather than via sp-core) keeps the cdylib small while producing byte-identical
+# keys, signatures and verification results — sp_core::sr25519 is a thin wrapper over these calls.
+schnorrkel = { version = "0.11", default-features = false, features = ["std", "getrandom"] }
+
+[profile.release]
+# Crypto throughput matters here (unlike smoldot, which optimises for size), so favour speed.
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+# These FFI exports never unwind across the boundary (all fallible paths return Result/error codes),
+# and aborting on an unexpected panic is safer than unwinding into Dart.
+panic = "abort"
+
+[profile.dev]
+opt-level = 1
+
+[build-dependencies]
+cbindgen = "0.27"

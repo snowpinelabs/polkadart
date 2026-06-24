@@ -187,6 +187,19 @@ jobs:
         if: ${{ matrix.package == 'smoldot' }}
         run: bash packages/smoldot/tool/build_rust.sh
 
+      # sr25519 has an optional audited Rust backend. Building it lets the backend tests exercise the
+      # Rust path (and cross-backend interop); without it they fall back to pure-Dart automatically.
+      # The toolchain version is pinned by packages/sr25519/rust/rust-toolchain.toml.
+      - name: Cache sr25519 Rust build
+        if: ${{ matrix.package == 'sr25519' }}
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: packages/sr25519/rust
+
+      - name: Build sr25519 native library
+        if: ${{ matrix.package == 'sr25519' }}
+        run: bash packages/sr25519/tool/build_rust.sh
+
       - name: Check format
         run: |
           SCOPE="${{ matrix.package }}" dart run melos run format

@@ -5,3 +5,15 @@
 # Avoid committing pubspec.lock for library packages; see
 # https://dart.dev/guides/libraries/private-files#pubspeclock.
 pubspec.lock
+
+# Conventional directory for build outputs
+coverage/
+
+# Native libraries are built (tool/build_rust.sh) or downloaded (dart run sr25519:setup),
+# never committed. The C header (native/sr25519.h) and native/README.md ARE committed.
+native/**/*.so
+native/**/*.dylib
+native/**/*.dll
+*.so
+*.dylib
+*.dll
