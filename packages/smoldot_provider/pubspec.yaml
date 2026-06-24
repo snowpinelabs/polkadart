@@ -1,0 +1,17 @@
+name: smoldot_provider
+description: >-
+  A light-client (smoldot) JSON-RPC provider for Dart. Turns a smoldot `Chain` 
+  into a standard string-based `JsonRpcProvider`.
+version: 1.2.1
+repository: https://github.com/snowpinelabs/polkadart
+resolution: workspace
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  smoldot: ^1.2.1
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.0

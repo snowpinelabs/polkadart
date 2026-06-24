@@ -13,6 +13,7 @@ workspace:
   - packages/polkadart_scale_codec
   - packages/secp256k1_ecdsa
   - packages/smoldot
+  - packages/smoldot_provider
   - packages/sr25519
   - packages/ss58
   - packages/substrate_bip39
