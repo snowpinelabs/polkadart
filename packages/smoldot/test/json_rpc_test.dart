@@ -5,10 +5,13 @@ import 'dart:io';
 import 'package:test/test.dart';
 import 'package:smoldot/smoldot.dart';
 
+import 'support/json_rpc_client.dart';
+
 void main() {
-  group('JSON-RPC Tests', () {
+  group('JSON-RPC (raw interface)', () {
     late SmoldotClient client;
     late Chain chain;
+    late JsonRpcClient rpc;
 
     setUpAll(() async {
       client = SmoldotClient(config: SmoldotConfig(maxLogLevel: 3));
@@ -25,75 +28,60 @@ void main() {
 
       final westendSpec = await westendSpecFile.readAsString();
       chain = await client.addChain(AddChainConfig(chainSpec: westendSpec));
+      rpc = JsonRpcClient(chain);
     });
 
     tearDownAll(() async {
+      await rpc.close();
       if (client.isInitialized) {
         await client.dispose();
       }
     });
 
-    test('should make system_chain request', () async {
-      final response = await chain.request('system_chain', []);
-      expect(response, isNotNull);
-      expect(response.isSuccess, isTrue);
-      expect(response.result, equals('Westend'));
+    test('system_chain', () async {
+      expect(await rpc.call('system_chain'), equals('Westend'));
     });
 
-    test('should make system_version request', () async {
-      final response = await chain.request('system_version', []);
-      expect(response, isNotNull);
-      expect(response.isSuccess, isTrue);
-      expect(response.result, isNotEmpty);
+    test('system_version', () async {
+      expect(await rpc.call('system_version'), isNotEmpty);
     });
 
-    test('should make system_name request', () async {
-      final response = await chain.request('system_name', []);
-      expect(response, isNotNull);
-      expect(response.isSuccess, isTrue);
-      expect(response.result, isNotEmpty);
+    test('system_name', () async {
+      expect(await rpc.call('system_name'), isNotEmpty);
     });
 
-    test('should make system_properties request', () async {
-      final response = await chain.request('system_properties', []);
-      expect(response, isNotNull);
-      expect(response.isSuccess, isTrue);
-      expect(response.result, isA<Map<String, dynamic>>());
+    test('system_properties', () async {
+      expect(await rpc.call('system_properties'), isA<Map<String, dynamic>>());
     });
 
-    test('should make chain_getFinalizedHead request', () async {
-      final response = await chain.request('chain_getFinalizedHead', []);
-      expect(response, isNotNull);
-      expect(response.isSuccess, isTrue);
-      expect(response.result, isA<String>());
-      expect((response.result as String).startsWith('0x'), isTrue);
+    test(
+      'chain_getFinalizedHead',
+      () async {
+        final head = await rpc.call('chain_getFinalizedHead') as String;
+        expect(head.startsWith('0x'), isTrue);
+      },
+      // Needs warp-sync to a finalized block, which can take >30s on Westend.
+      timeout: const Timeout(Duration(minutes: 3)),
+    );
+
+    test('handles multiple concurrent requests', () async {
+      final results = await Future.wait([
+        rpc.call('system_chain'),
+        rpc.call('system_version'),
+        rpc.call('system_name'),
+        rpc.call('system_properties'),
+      ]);
+
+      expect(results.length, equals(4));
+      expect(results[0], equals('Westend'));
+      expect(results[1], isNotEmpty);
+      expect(results[2], isNotEmpty);
+      expect(results[3], isA<Map<String, dynamic>>());
     });
 
-    test('should handle multiple concurrent requests', () async {
-      // Test concurrent requests with tokio::sync::Mutex fix
-      final futures = [
-        chain.request('system_chain', []),
-        chain.request('system_version', []),
-        chain.request('system_name', []),
-        chain.request('system_properties', []),
-      ];
-
-      final responses = await Future.wait(futures);
-
-      expect(responses.length, equals(4));
-      expect(responses[0].result, equals('Westend'));
-      expect(responses[1].isSuccess, isTrue);
-      expect(responses[2].isSuccess, isTrue);
-      expect(responses[3].isSuccess, isTrue);
-    });
-
-    test('should handle request with parameters', () async {
-      // Get block hash at height 0 (genesis)
-      final response = await chain.request('chain_getBlockHash', [0]);
-      expect(response, isNotNull);
-      expect(response.isSuccess, isTrue);
-      expect(response.result, isA<String>());
-      expect((response.result as String).startsWith('0x'), isTrue);
+    test('request with parameters (chain_getBlockHash)', () async {
+      final hash = await rpc.call('chain_getBlockHash', [0]) as String;
+      expect(hash.startsWith('0x'), isTrue);
     });
   });
 }

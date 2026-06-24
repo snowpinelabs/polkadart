@@ -1,292 +1,122 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:ffi';
 import 'package:ffi/ffi.dart';
 import 'bindings.dart';
 import 'types.dart';
 
-/// Global callback registry for JSON-RPC responses
-final Map<int, Completer<String>> _jsonRpcCallbackRegistry = {};
+/// Global registry mapping a unique callback id to the completer awaiting the
+/// next JSON-RPC response string for that pull.
+final Map<int, Completer<String>> _responseRegistry = {};
 
-/// Global JSON-RPC callback - called from Rust
-void _jsonRpcCallback(int callbackId, int result, Pointer<Utf8> error) {
-  final completer = _jsonRpcCallbackRegistry.remove(callbackId);
+/// Process-wide monotonic callback id so concurrent chains never collide.
+int _nextCallbackId = 0;
+
+/// Invoked from Rust when a JSON-RPC response/notification is ready for a
+/// pending [RawJsonRpc.next] pull.
+void _onJsonRpcResponse(int callbackId, int result, Pointer<Utf8> error) {
+  final completer = _responseRegistry.remove(callbackId);
   if (completer == null) {
-    print('Warning: No completer found for JSON-RPC callback ID $callbackId');
     return;
   }
-
   if (error != nullptr) {
-    final errorMsg = error.toDartString();
-    completer.completeError(JsonRpcException('JSON-RPC error: $errorMsg'));
+    completer.completeError(
+      JsonRpcException('JSON-RPC error: ${error.toDartString()}'),
+    );
   } else {
-    // result contains pointer to response string
-    final responsePtr = Pointer<Utf8>.fromAddress(result);
-    final responseJson = responsePtr.toDartString();
-    completer.complete(responseJson);
+    completer.complete(Pointer<Utf8>.fromAddress(result).toDartString());
   }
 }
 
-/// Handles JSON-RPC requests and subscriptions for a chain
+/// Raw JSON-RPC pump over smoldot's FFI for a single chain.
 ///
-/// This class manages the JSON-RPC communication with smoldot,
-/// including request/response handling and subscription management.
-class JsonRpcHandler {
-  /// Chain identifier (handle from Rust)
-  final int chainId;
-
-  /// FFI bindings
-  final SmoldotBindings bindings;
-
-  /// Native client handle (u64 from Rust)
-  final int clientHandle;
-
-  /// Request ID counter
-  int _requestId = 0;
-
-  /// Callback ID counter
-  int _callbackId = 0;
-
-  /// Pending requests map (request ID -> completer)
-  final Map<String, Completer<JsonRpcResponse>> _pendingRequests = {};
-
-  /// Active subscriptions map (subscription ID -> stream controller)
-  final Map<String, StreamController<JsonRpcResponse>> _subscriptions = {};
-
-  /// Pending subscription requests (request ID -> stream controller)
-  final Map<String, StreamController<JsonRpcResponse>> _pendingSubscriptions =
-      {};
-
-  /// Native callback for JSON-RPC responses
-  late final NativeCallable<DartCallbackNative> _nativeCallable;
-  late final Pointer<NativeFunction<DartCallbackNative>> _nativeCallback;
-
-  /// Creates a new JSON-RPC handler
-  JsonRpcHandler({
-    required this.chainId,
-    required this.bindings,
-    required this.clientHandle,
-  }) {
+/// Mirrors the official smoldot **JS** `Chain` interface: you send raw JSON-RPC
+/// request strings and pull raw response/notification strings. There is **no**
+/// request/subscription correlation here — the caller owns request ids,
+/// subscription-id correlation, and framing (i.e. runs its own JSON-RPC client),
+/// exactly like substrate-connect / polkadot-api do over the JS bindings.
+class RawJsonRpc {
+  RawJsonRpc({required this.chainId, required this.bindings}) {
     _nativeCallable = NativeCallable<DartCallbackNative>.listener(
-      _jsonRpcCallback,
+      _onJsonRpcResponse,
     );
     _nativeCallback = _nativeCallable.nativeFunction;
   }
 
-  /// Send a JSON-RPC request
-  ///
-  /// Returns a [Future] that completes with the response.
-  Future<JsonRpcResponse> request(String method, List<dynamic> params) async {
-    final id = _generateRequestId();
+  /// Chain handle this pump talks to.
+  final int chainId;
 
-    final request = {
-      'jsonrpc': '2.0',
-      'id': id,
-      'method': method,
-      'params': params,
-    };
+  /// FFI bindings.
+  final SmoldotBindings bindings;
 
-    try {
-      // Create completer for this request
-      final completer = Completer<JsonRpcResponse>();
-      _pendingRequests[id] = completer;
+  late final NativeCallable<DartCallbackNative> _nativeCallable;
+  late final Pointer<NativeFunction<DartCallbackNative>> _nativeCallback;
 
-      // Send the request
-      bindings.sendJsonRpcRequest(chainId, jsonEncode(request));
+  /// Callback ids of in-flight [next] pulls, so [dispose] can settle them.
+  final Set<int> _pending = {};
 
-      // Start polling for response
-      _pollForResponse();
+  Stream<String>? _responses;
+  bool _disposed = false;
 
-      return await completer.future;
-    } catch (e) {
-      _pendingRequests.remove(id);
-      rethrow;
-    }
+  /// Send a raw JSON-RPC request string to the chain.
+  void send(String rpc) {
+    _ensureNotDisposed();
+    bindings.sendJsonRpcRequest(chainId, rpc);
   }
 
-  /// Poll for next JSON-RPC response
-  void _pollForResponse() {
-    final callbackId = _callbackId++;
+  /// Pull the next JSON-RPC response or notification as a raw JSON string.
+  ///
+  /// Call sequentially: await each result before requesting the next one (the
+  /// same contract as the JS `nextJsonRpcResponse`).
+  Future<String> next() {
+    _ensureNotDisposed();
+    final callbackId = _nextCallbackId++;
     final completer = Completer<String>();
-    _jsonRpcCallbackRegistry[callbackId] = completer;
-
-    // Call Rust function to get next response
+    _responseRegistry[callbackId] = completer;
+    _pending.add(callbackId);
     bindings.nextJsonRpcResponse(
       chainHandle: chainId,
       callbackId: callbackId,
       callback: _nativeCallback,
     );
-
-    // Process response when available
-    completer.future
-        .then((responseJson) {
-          try {
-            final response = jsonDecode(responseJson) as Map<String, dynamic>;
-
-            // Check if this is a subscription notification
-            final method = response['method'] as String?;
-            if (method != null) {
-              // This is a subscription notification
-              _handleSubscriptionNotification(response);
-            } else {
-              // This is a regular response or subscription confirmation
-              final id = response['id']?.toString();
-
-              if (id != null) {
-                // Check if this is a subscription confirmation
-                if (_pendingSubscriptions.containsKey(id)) {
-                  final controller = _pendingSubscriptions.remove(id);
-                  final result = response['result'];
-
-                  if (result != null) {
-                    // Subscription successful - store the subscription ID
-                    final subscriptionId = result.toString();
-                    _subscriptions[subscriptionId] = controller!;
-                  } else {
-                    // Subscription failed
-                    final error = response['error'];
-                    controller?.addError(
-                      JsonRpcException(
-                        'Subscription failed',
-                        error: error != null
-                            ? JsonRpcError.fromJson(
-                                error as Map<String, dynamic>,
-                              )
-                            : null,
-                      ),
-                    );
-                    controller?.close();
-                  }
-                } else if (_pendingRequests.containsKey(id)) {
-                  // Regular request response
-                  final requestCompleter = _pendingRequests.remove(id);
-                  requestCompleter?.complete(
-                    JsonRpcResponse.fromJson(response),
-                  );
-                }
-              }
-            }
-
-            // Continue polling if there are pending requests or active subscriptions
-            if (_pendingRequests.isNotEmpty ||
-                _pendingSubscriptions.isNotEmpty ||
-                _subscriptions.isNotEmpty) {
-              _pollForResponse();
-            }
-          } catch (e) {
-            // JSON decode error - complete all pending with error
-            for (final completer in _pendingRequests.values) {
-              completer.completeError(
-                JsonRpcException('Failed to decode JSON-RPC response: $e'),
-              );
-            }
-            _pendingRequests.clear();
-          }
-        })
-        .catchError((Object error, StackTrace stackTrace) {
-          // Error getting response - complete all pending with error
-          for (final completer in _pendingRequests.values) {
-            completer.completeError(error, stackTrace);
-          }
-          _pendingRequests.clear();
-        });
+    return completer.future.whenComplete(() => _pending.remove(callbackId));
   }
 
-  /// Handle subscription notification
-  void _handleSubscriptionNotification(Map<String, dynamic> notification) {
-    final params = notification['params'] as Map<String, dynamic>?;
-    if (params == null) return;
+  /// A single-subscription stream of raw response/notification strings — sugar
+  /// over repeated [next]. Use either this or [next], not both concurrently.
+  Stream<String> get responses => _responses ??= _pump();
 
-    final subscriptionId = params['subscription']?.toString();
-    if (subscriptionId == null) return;
-
-    final controller = _subscriptions[subscriptionId];
-    if (controller != null && !controller.isClosed) {
-      // Create a response object from the notification
-      final response = JsonRpcResponse(
-        id: subscriptionId,
-        result: params['result'],
-      );
-      controller.add(response);
+  Stream<String> _pump() async* {
+    while (!_disposed) {
+      yield await next();
     }
   }
 
-  /// Subscribe to JSON-RPC notifications
-  ///
-  /// Returns a [Stream] of responses.
-  Stream<JsonRpcResponse> subscribe(String method, List<dynamic> params) {
-    final id = _generateRequestId();
-
-    final request = {
-      'jsonrpc': '2.0',
-      'id': id,
-      'method': method,
-      'params': params,
-    };
-
-    // Create stream controller for this subscription
-    final controller = StreamController<JsonRpcResponse>.broadcast();
-    _pendingSubscriptions[id] = controller;
-
-    try {
-      // Send the subscription request
-      bindings.sendJsonRpcRequest(chainId, jsonEncode(request));
-
-      // Start polling for responses
-      _pollForResponse();
-
-      return controller.stream;
-    } catch (e) {
-      _pendingSubscriptions.remove(id);
-      controller.addError(e);
-      controller.close();
-      rethrow;
-    }
-  }
-
-  /// Unsubscribe from a subscription
-  Future<void> unsubscribe(String subscriptionId) async {
-    final controller = _subscriptions.remove(subscriptionId);
-    if (controller != null) {
-      // Determine the unsubscribe method based on the original subscribe method
-      // Most Substrate subscriptions use the pattern: method_unsubscribe
-      // For example: chain_subscribeNewHeads -> chain_unsubscribeNewHeads
-
-      // Send unsubscribe request
-      try {
-        await request('unsubscribe', [subscriptionId]);
-      } catch (e) {
-        // Ignore errors on unsubscribe
-      }
-
-      await controller.close();
-    }
-  }
-
-  /// Generate a unique request ID
-  String _generateRequestId() {
-    return '${_requestId++}';
-  }
-
-  /// Dispose of resources
+  /// Release the native callback and settle any in-flight pulls.
   void dispose() {
+    if (_disposed) {
+      return;
+    }
+    _disposed = true;
+    for (final callbackId in _pending.toList()) {
+      _responseRegistry
+          .remove(callbackId)
+          ?.completeError(
+            SmoldotException('Chain $chainId JSON-RPC handler disposed'),
+          );
+    }
+    _pending.clear();
     _nativeCallable.close();
-    _pendingRequests.clear();
+  }
 
-    // Close all active subscriptions
-    for (final controller in _subscriptions.values) {
-      controller.close();
+  void _ensureNotDisposed() {
+    if (_disposed) {
+      throw SmoldotException('Chain $chainId JSON-RPC handler disposed');
     }
-    _subscriptions.clear();
-
-    for (final controller in _pendingSubscriptions.values) {
-      controller.close();
-    }
-    _pendingSubscriptions.clear();
   }
 }
 
-/// Predefined Substrate JSON-RPC methods
+/// Predefined Substrate JSON-RPC method names (convenience constants for use
+/// with the raw [RawJsonRpc] / `Chain.sendJsonRpc` interface).
 class SubstrateRpcMethods {
   /// Get the name of the blockchain
   static const systemChain = 'system_chain';
@@ -347,8 +177,8 @@ class SubstrateRpcMethods {
   static const authorUnwatchExtrinsic = 'author_unwatchExtrinsic';
 
   // ===== New JSON-RPC API (smoldot-light >= 1.0) =====
-  // These are reachable today through [Chain.request] / [Chain.subscribe] with no extra
-  // native work; the constants are provided for convenience and discoverability.
+  // Reachable through the raw `Chain.sendJsonRpc` / [RawJsonRpc.send] interface;
+  // the constants are provided for convenience and discoverability.
 
   /// chainHead v1: follow the head of the chain (JSON-RPC v2 / "new" API).
   static const chainHeadV1Follow = 'chainHead_v1_follow';

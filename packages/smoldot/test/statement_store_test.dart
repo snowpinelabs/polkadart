@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:test/test.dart';
 import 'package:smoldot/smoldot.dart';
 
+import 'support/json_rpc_client.dart';
+
 void main() {
   group('StatementStoreConfig', () {
     test('has upstream-matching defaults', () {
@@ -82,9 +84,10 @@ void main() {
           ),
         );
 
-        final name = await chain.request('system_chain', []);
-        expect(name.isSuccess, isTrue);
-        expect(name.result, equals('Westend'));
+        final rpc = JsonRpcClient(chain);
+        final name = await rpc.call('system_chain');
+        expect(name, equals('Westend'));
+        await rpc.close();
       },
     );
   });

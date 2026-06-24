@@ -14,8 +14,15 @@
 ///
 /// ## Usage
 ///
+/// The `Chain` exposes the **raw JSON-RPC interface** — the exact shape of the
+/// official smoldot JS bindings (`sendJsonRpc` / `nextJsonRpcResponse` /
+/// `jsonRpcResponses`). The caller owns request ids and subscription
+/// correlation; run a JSON-RPC client on top (as substrate-connect /
+/// polkadot-api do) for request/response and subscription helpers.
+///
 /// ```dart
-/// import 'package:smoldot_light/smoldot_light.dart';
+/// import 'dart:convert';
+/// import 'package:smoldot/smoldot.dart';
 ///
 /// void main() async {
 ///   // Create and initialize the client
@@ -35,17 +42,19 @@
 ///     ),
 ///   );
 ///
-///   // Wait for sync
-///   await chain.waitUntilSynced();
+///   // Send a JSON-RPC request with your own id, then read the response.
+///   chain.sendJsonRpc(
+///     '{"jsonrpc":"2.0","id":1,"method":"system_chain","params":[]}',
+///   );
+///   final response = jsonDecode(await chain.nextJsonRpcResponse());
+///   print('Connected to: ${response['result']}');
 ///
-///   // Make JSON-RPC calls
-///   final chainName = await chain.request('system_chain', []);
-///   print('Connected to: ${chainName.result}');
-///
-///   // Subscribe to new blocks
-///   final subscription = chain.subscribe('chain_subscribeNewHeads', []);
-///   await for (final response in subscription) {
-///     print('New block: ${response.result}');
+///   // Subscribe by reading the continuous response/notification stream.
+///   chain.sendJsonRpc(
+///     '{"jsonrpc":"2.0","id":2,"method":"chainHead_v1_follow","params":[false]}',
+///   );
+///   await for (final raw in chain.jsonRpcResponses) {
+///     print('chainHead event: $raw');
 ///   }
 ///
 ///   // Clean up
@@ -85,11 +94,7 @@
 /// ## Persistence
 ///
 /// ```dart
-/// // Get database content for persistence
-/// final dbContent = await chain.getDatabaseContent();
-/// await saveToFile(dbContent);
-///
-/// // Restore from database
+/// // Restore from a previously saved database snapshot.
 /// final chain = await client.addChain(
 ///   AddChainConfig(
 ///     chainSpec: spec,
@@ -102,12 +107,10 @@
 ///
 /// ```dart
 /// try {
-///   final response = await chain.request('system_chain', []);
-///   print(response.result);
-/// } on JsonRpcException catch (e) {
-///   print('RPC error: ${e.error}');
-/// } on ChainException catch (e) {
-///   print('Chain error: ${e.message}');
+///   chain.sendJsonRpc(
+///     '{"jsonrpc":"2.0","id":1,"method":"system_chain","params":[]}',
+///   );
+///   print(await chain.nextJsonRpcResponse());
 /// } on SmoldotException catch (e) {
 ///   print('Smoldot error: ${e.message}');
 /// }
@@ -116,7 +119,7 @@ library smoldot;
 
 export 'src/chain.dart' show Chain;
 export 'src/client.dart' show SmoldotClient;
-export 'src/json_rpc.dart' show JsonRpcHandler, SubstrateRpcMethods;
+export 'src/json_rpc.dart' show RawJsonRpc, SubstrateRpcMethods;
 export 'src/platform.dart' show SmoldotPlatform;
 export 'src/types.dart'
     show
