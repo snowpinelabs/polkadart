@@ -29,7 +29,7 @@ Packages with other changes:
 
 #### `substrate_bip39` - `v0.7.1`
 
- - **FIX**: Entropy property on newer library version ([#691](https://github.com/snowpinelabs/polkadart/issues/691)).
+ - **FIX**: Entropy property on newer library version ([#691](https://github.com/justkawal/polkadart/pull/691)).
 
 #### `polkadart_keyring` - `v0.7.1`
 
