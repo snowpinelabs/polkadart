@@ -6,10 +6,13 @@ import 'dart:async';
 import 'package:test/test.dart';
 import 'package:smoldot/smoldot.dart';
 
+import 'support/json_rpc_client.dart';
+
 void main() {
-  group('Subscription Tests', () {
+  group('Subscription Tests (raw interface)', () {
     late SmoldotClient client;
     late Chain chain;
+    late JsonRpcClient rpc;
 
     setUpAll(() async {
       client = SmoldotClient(config: SmoldotConfig(maxLogLevel: 3));
@@ -26,147 +29,129 @@ void main() {
 
       final westendSpec = await westendSpecFile.readAsString();
       chain = await client.addChain(AddChainConfig(chainSpec: westendSpec));
+      rpc = JsonRpcClient(chain);
     });
 
     tearDownAll(() async {
+      await rpc.close();
       if (client.isInitialized) {
         await client.dispose();
       }
     });
 
     test('should subscribe to new heads', () async {
-      final subscription = chain.subscribe('chain_subscribeNewHeads', []);
+      final (_, stream) = await rpc.subscribe(
+        'chain_subscribeNewHeads',
+        [],
+        'chain_unsubscribeNewHeads',
+      );
 
-      // Wait for first few blocks
-      final blocks = <JsonRpcResponse>[];
+      final blocks = <dynamic>[];
       final completer = Completer<void>();
-
-      StreamSubscription<JsonRpcResponse>? sub;
-      sub = subscription.listen(
-        (response) {
-          print('New block: ${response.result}');
-          blocks.add(response);
-
+      StreamSubscription<dynamic>? sub;
+      sub = stream.listen(
+        (result) {
+          blocks.add(result);
           if (blocks.length >= 2) {
             sub?.cancel();
-            completer.complete();
+            if (!completer.isCompleted) completer.complete();
           }
         },
         onError: (Object error) {
-          print('Subscription error: $error');
-          completer.completeError(error);
+          if (!completer.isCompleted) completer.completeError(error);
         },
       );
 
-      // Wait for at least 2 blocks (with timeout)
+      // Westend warp-sync can take ~60s before the first head is produced;
+      // allow ample headroom so the assertion reflects functionality, not latency.
       await completer.future.timeout(
-        // Westend warp-sync can take ~60s before the first head is produced;
-        // allow ample headroom so the assertion reflects functionality, not sync latency.
-        Duration(seconds: 180),
-        onTimeout: () {
-          sub?.cancel();
-          if (blocks.isEmpty) {
-            throw TimeoutException('No blocks received');
-          }
-          // If we got at least 1 block, that's acceptable
-        },
+        const Duration(seconds: 180),
+        onTimeout: () => sub?.cancel(),
       );
 
       expect(blocks, isNotEmpty);
-      print('Received ${blocks.length} block notifications');
     });
 
     test('should subscribe to finalized heads', () async {
-      final subscription = chain.subscribe('chain_subscribeFinalizedHeads', []);
+      final (_, stream) = await rpc.subscribe(
+        'chain_subscribeFinalizedHeads',
+        [],
+        'chain_unsubscribeFinalizedHeads',
+      );
 
-      // Wait for first finalized block
-      final blocks = <JsonRpcResponse>[];
+      final blocks = <dynamic>[];
       final completer = Completer<void>();
-
-      StreamSubscription<JsonRpcResponse>? sub;
-      sub = subscription.listen(
-        (response) {
-          print('Finalized block: ${response.result}');
-          blocks.add(response);
-
+      StreamSubscription<dynamic>? sub;
+      sub = stream.listen(
+        (result) {
+          blocks.add(result);
           if (blocks.isNotEmpty) {
             sub?.cancel();
-            completer.complete();
+            if (!completer.isCompleted) completer.complete();
           }
         },
         onError: (Object error) {
-          print('Subscription error: $error');
-          completer.completeError(error);
+          if (!completer.isCompleted) completer.completeError(error);
         },
       );
 
-      // Wait for at least 1 finalized block (with timeout)
       await completer.future.timeout(
-        // Westend warp-sync can take ~60s before the first head is produced;
-        // allow ample headroom so the assertion reflects functionality, not sync latency.
-        Duration(seconds: 180),
-        onTimeout: () {
-          sub?.cancel();
-          if (blocks.isEmpty) {
-            // Finalized blocks might take longer, so just warn
-            print('Warning: No finalized blocks received in 30s');
-          }
-        },
+        const Duration(seconds: 180),
+        onTimeout: () => sub?.cancel(),
       );
 
-      // Don't fail if no finalized blocks (they can take a while)
-      print('Received ${blocks.length} finalized block notifications');
+      // Finalized blocks can take a while; don't fail if none arrived in time.
+      expect(blocks, isA<List<dynamic>>());
     });
 
     test('should handle multiple concurrent subscriptions', () async {
-      final sub1 = chain.subscribe('chain_subscribeNewHeads', []);
-      final sub2 = chain.subscribe('chain_subscribeFinalizedHeads', []);
+      final (_, stream1) = await rpc.subscribe(
+        'chain_subscribeNewHeads',
+        [],
+        'chain_unsubscribeNewHeads',
+      );
+      final (_, stream2) = await rpc.subscribe(
+        'chain_subscribeFinalizedHeads',
+        [],
+        'chain_unsubscribeFinalizedHeads',
+      );
 
-      final blocks1 = <JsonRpcResponse>[];
-      final blocks2 = <JsonRpcResponse>[];
-
+      final blocks1 = <dynamic>[];
+      final blocks2 = <dynamic>[];
       final completer = Completer<void>();
-      int subscriptionsComplete = 0;
+      var done = 0;
+      StreamSubscription<dynamic>? sub1;
+      StreamSubscription<dynamic>? sub2;
 
-      StreamSubscription? subscription1;
-      StreamSubscription? subscription2;
+      void maybeComplete() {
+        if (done == 2 && !completer.isCompleted) completer.complete();
+      }
 
-      subscription1 = sub1.listen((response) {
-        blocks1.add(response);
+      sub1 = stream1.listen((result) {
+        blocks1.add(result);
         if (blocks1.length >= 1) {
-          subscription1?.cancel();
-          subscriptionsComplete++;
-          if (subscriptionsComplete == 2) {
-            completer.complete();
-          }
+          sub1?.cancel();
+          done++;
+          maybeComplete();
         }
       });
-
-      subscription2 = sub2.listen((response) {
-        blocks2.add(response);
+      sub2 = stream2.listen((result) {
+        blocks2.add(result);
         if (blocks2.length >= 1) {
-          subscription2?.cancel();
-          subscriptionsComplete++;
-          if (subscriptionsComplete == 2) {
-            completer.complete();
-          }
+          sub2?.cancel();
+          done++;
+          maybeComplete();
         }
       });
 
-      // Wait for both subscriptions to get at least one notification
       await completer.future.timeout(
-        // Westend warp-sync can take ~60s before the first head is produced;
-        // allow ample headroom so the assertion reflects functionality, not sync latency.
-        Duration(seconds: 180),
+        const Duration(seconds: 180),
         onTimeout: () {
-          subscription1?.cancel();
-          subscription2?.cancel();
+          sub1?.cancel();
+          sub2?.cancel();
         },
       );
 
-      print(
-        'Subscription 1 received ${blocks1.length} blocks, Subscription 2 received ${blocks2.length} blocks',
-      );
       expect(blocks1.isNotEmpty || blocks2.isNotEmpty, isTrue);
     });
   });

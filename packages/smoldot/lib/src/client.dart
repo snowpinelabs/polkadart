@@ -34,8 +34,10 @@ final Map<int, Completer<int>> _globalCallbackRegistry = {};
 ///   ),
 /// );
 ///
-/// final response = await chain.request('system_chain', []);
-/// print('Chain name: ${response.result}');
+/// chain.sendJsonRpc(
+///   '{"jsonrpc":"2.0","id":1,"method":"system_chain","params":[]}',
+/// );
+/// print('Response: ${await chain.nextJsonRpcResponse()}');
 ///
 /// await client.dispose();
 /// ```
@@ -115,14 +117,6 @@ class SmoldotClient {
 
   /// Check if a chain exists
   bool hasChain(int chainId) => _chains.containsKey(chainId);
-
-  /// Get information about all chains
-  Future<List<ChainInfo>> getAllChainInfo() async {
-    _ensureInitialized();
-
-    final futures = _chains.values.map((chain) => chain.getInfo()).toList();
-    return await Future.wait(futures);
-  }
 
   /// Initialize the smoldot client
   ///
