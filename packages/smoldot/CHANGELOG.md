@@ -1,12 +1,9 @@
 ## 1.2.1
 
-- **`Chain` now exposes the raw JSON-RPC interface, matching the official smoldot JS bindings**:
+- **`Chain` now exposes the raw JSON-RPC interface**:
   `sendJsonRpc(String)`, `nextJsonRpcResponse() -> Future<String>`, and
   `jsonRpcResponses -> Stream<String>`. The caller owns request ids and subscription
-  correlation (run your own JSON-RPC client, as substrate-connect / polkadot-api do over the
-  JS bindings). Removed the incomplete convenience layer that hid the raw interface and dropped
-  subscription ids (`Chain.request`/`subscribe`/`unsubscribe`, the chain-info helpers, and
-  `SmoldotClient.getAllChainInfo`); the `JsonRpcHandler` export is now `RawJsonRpc`.
+  correlation; the `JsonRpcHandler` export is now `RawJsonRpc`.
 
 ## 1.2.0
 
