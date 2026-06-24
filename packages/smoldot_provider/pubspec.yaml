@@ -4,7 +4,7 @@ description: >-
   smoldot provider (`@polkadot-api/sm-provider`). Turns a smoldot `Chain` into a
   standard string-based `JsonRpcProvider` you can drive with your own JSON-RPC
   client.
-version: 0.1.0
+version: 1.2.1
 repository: https://github.com/snowpinelabs/polkadart
 resolution: workspace
 
@@ -12,7 +12,7 @@ environment:
   sdk: ^3.8.0
 
 dependencies:
-  smoldot: ^1.2.0
+  smoldot: ^1.2.1
 
 dev_dependencies:
   lints: ^6.0.0

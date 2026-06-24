@@ -1,3 +1,13 @@
+## 1.2.1
+
+- **`Chain` now exposes the raw JSON-RPC interface, matching the official smoldot JS bindings**:
+  `sendJsonRpc(String)`, `nextJsonRpcResponse() -> Future<String>`, and
+  `jsonRpcResponses -> Stream<String>`. The caller owns request ids and subscription
+  correlation (run your own JSON-RPC client, as substrate-connect / polkadot-api do over the
+  JS bindings). Removed the incomplete convenience layer that hid the raw interface and dropped
+  subscription ids (`Chain.request`/`subscribe`/`unsubscribe`, the chain-info helpers, and
+  `SmoldotClient.getAllChainInfo`); the `JsonRpcHandler` export is now `RawJsonRpc`.
+
 ## 1.2.0
 
 - Realigned the package version to track the wrapped `smoldot-light` Rust crate version
@@ -17,13 +27,6 @@
   for the current desktop platform from the GitHub Release, verify its Ed25519 signature, and
   install it into a per-user cache the loader finds automatically — no Rust toolchain required.
   Currently covers desktop Linux/macOS/Windows on x64+arm64; mobile prebuilts come later
-- **`Chain` now exposes the raw JSON-RPC interface, matching the official smoldot JS bindings**:
-  `sendJsonRpc(String)`, `nextJsonRpcResponse() -> Future<String>`, and
-  `jsonRpcResponses -> Stream<String>`. The caller owns request ids and subscription
-  correlation (run your own JSON-RPC client, as substrate-connect / polkadot-api do over the
-  JS bindings). Removed the incomplete convenience layer that hid the raw interface and dropped
-  subscription ids (`Chain.request`/`subscribe`/`unsubscribe`, the chain-info helpers, and
-  `SmoldotClient.getAllChainInfo`); the `JsonRpcHandler` export is now `RawJsonRpc`.
 
 ## 0.1.2
 
