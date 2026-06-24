@@ -1,14 +1,12 @@
 # smoldot_provider
 
-A light-client (smoldot) JSON-RPC provider for Dart — the Dart equivalent of
-polkadot-api's smoldot provider ([`@polkadot-api/sm-provider`]).
+A light-client (smoldot) JSON-RPC provider for Dart.
 
 `getSmProvider` turns a smoldot `Chain` into a standard, string-based
-`JsonRpcProvider` (the same shape polkadot-api / substrate-connect use): you call
-it with an `onMessage` callback and get back a connection you `send` raw JSON-RPC
-strings to. **You run your own JSON-RPC client over it** — owning request ids and
-subscription-id correlation — exactly as on the JS/TS path. Only the light-client
-(smoldot) provider is supported; there is intentionally no WebSocket/other kind.
+`JsonRpcProvider`: you call it with an `onMessage` callback and get back a
+connection you `send` raw JSON-RPC strings to. **You run your own JSON-RPC
+client over it**. Only the light-client (smoldot) provider is supported;
+there is intentionally no WebSocket/other kind.
 
 ## Usage
 
@@ -52,8 +50,6 @@ final provider = getSmProvider(
 
 ## Interface
 
-Mirrors polkadot-api's `@polkadot-api/json-rpc-provider`:
-
 ```dart
 typedef JsonRpcProvider = JsonRpcConnection Function(
   void Function(String message) onMessage,
@@ -77,5 +73,3 @@ dart analyze
 dart test               # unit tests (no native lib)
 dart test --tags network  # integration vs a live chain (needs the smoldot native lib + network)
 ```
-
-[`@polkadot-api/sm-provider`]: https://github.com/polkadot-api/polkadot-api/tree/main/packages/sm-provider
